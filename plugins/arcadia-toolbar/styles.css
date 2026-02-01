@@ -1,0 +1,179 @@
+/* ================================================================================
+   ARCADIA TOOLBAR STYLES
+
+   Formatting toolbar styling for the Arcadia Author plugin suite.
+   Designed to complement the Arcadia CSS theme.
+   ================================================================================ */
+
+/* Toolbar Container */
+.arcadia-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 12px;
+	background-color: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+/* When toolbar is at bottom */
+.arcadia-toolbar:last-child {
+	border-bottom: none;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Toolbar Buttons */
+.arcadia-toolbar-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background-color: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.arcadia-toolbar-button:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.arcadia-toolbar-button:active {
+	background-color: var(--background-modifier-active-hover);
+	transform: scale(0.95);
+}
+
+.arcadia-toolbar-button svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* Separator */
+.arcadia-toolbar-separator {
+	width: 1px;
+	height: 24px;
+	margin: 0 6px;
+	background-color: var(--background-modifier-border);
+}
+
+/* Active/Pressed State */
+.arcadia-toolbar-button.is-active {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+/* Disabled State */
+.arcadia-toolbar-button:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* Focus State for Accessibility */
+.arcadia-toolbar-button:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* Tooltip Styles */
+.arcadia-toolbar-button[aria-label]:hover::after {
+	content: attr(aria-label);
+	position: absolute;
+	bottom: -28px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 4px 8px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: 100;
+}
+
+/* Dropdown Menu for Headings (future enhancement) */
+.arcadia-toolbar-dropdown {
+	position: relative;
+}
+
+.arcadia-toolbar-dropdown-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	min-width: 120px;
+	padding: 4px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	z-index: 100;
+}
+
+.arcadia-toolbar-dropdown-item {
+	display: block;
+	width: 100%;
+	padding: 6px 12px;
+	text-align: left;
+	background: none;
+	border: none;
+	border-radius: 4px;
+	color: var(--text-normal);
+	cursor: pointer;
+}
+
+.arcadia-toolbar-dropdown-item:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Scripture Callout Styling (integrates with theme) */
+.callout[data-callout="scripture"] {
+	--callout-color: 139, 115, 85;
+	--callout-icon: book-open;
+	border-left-width: 4px;
+}
+
+.callout[data-callout="scripture"] .callout-title {
+	font-weight: 600;
+}
+
+.callout[data-callout="scripture"] .callout-content {
+	font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+	.arcadia-toolbar {
+		padding: 6px 8px;
+		gap: 2px;
+	}
+
+	.arcadia-toolbar-button {
+		width: 28px;
+		height: 28px;
+	}
+
+	.arcadia-toolbar-button svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	.arcadia-toolbar-separator {
+		height: 20px;
+		margin: 0 4px;
+	}
+}
+
+/* Print Styles - Hide toolbar when printing */
+@media print {
+	.arcadia-toolbar {
+		display: none !important;
+	}
+}

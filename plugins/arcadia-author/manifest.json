@@ -1,0 +1,10 @@
+{
+	"id": "arcadia-author",
+	"name": "Arcadia Author",
+	"version": "1.0.0",
+	"minAppVersion": "0.16.0",
+	"description": "Word-like authoring features for Obsidian - Inline comments, track changes, document templates, citations, and export pipelines. Part of the Arcadia Author suite.",
+	"author": "Peter J. Carter",
+	"authorUrl": "https://theologyinfocus.org",
+	"isDesktopOnly": true
+}

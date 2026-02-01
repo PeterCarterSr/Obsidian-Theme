@@ -1,0 +1,474 @@
+/* ================================================================================
+   ARCADIA AUTHOR STYLES
+
+   Word-like authoring features styling for the Arcadia Author plugin suite.
+   Designed to complement the Arcadia CSS theme.
+   ================================================================================ */
+
+/* ============================================================================
+   AUTHOR TOOLBAR
+   ============================================================================ */
+
+.arcadia-author-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 12px;
+	background-color: var(--background-secondary-alt);
+	border-bottom: 1px solid var(--background-modifier-border);
+	position: sticky;
+	top: 0;
+	z-index: 9;
+}
+
+.arcadia-author-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background-color: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.arcadia-author-button:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.arcadia-author-button:active {
+	background-color: var(--background-modifier-active-hover);
+	transform: scale(0.95);
+}
+
+.arcadia-author-button.is-active {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.arcadia-author-button.is-disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.arcadia-author-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.arcadia-author-separator {
+	width: 1px;
+	height: 20px;
+	margin: 0 6px;
+	background-color: var(--background-modifier-border);
+}
+
+/* ============================================================================
+   COMMENTS PANEL
+   ============================================================================ */
+
+.arcadia-comments-panel {
+	position: fixed;
+	top: 50px;
+	right: 0;
+	width: 320px;
+	max-width: 90vw;
+	height: calc(100vh - 50px);
+	background-color: var(--background-primary);
+	border-left: 1px solid var(--background-modifier-border);
+	box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+	z-index: 100;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.arcadia-comments-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+}
+
+.arcadia-comments-header h3 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.arcadia-comments-close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.arcadia-comments-close:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.arcadia-comments-list {
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px;
+}
+
+.arcadia-comments-empty {
+	padding: 16px;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 13px;
+}
+
+/* Individual Comment */
+.arcadia-comment {
+	padding: 12px;
+	margin-bottom: 8px;
+	background-color: var(--background-secondary);
+	border-radius: 8px;
+	border-left: 3px solid var(--interactive-accent);
+}
+
+.arcadia-comment.is-resolved {
+	opacity: 0.6;
+	border-left-color: var(--text-muted);
+}
+
+.arcadia-comment-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.arcadia-comment-author {
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--text-normal);
+}
+
+.arcadia-comment-date {
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+.arcadia-comment-text {
+	margin: 0 0 12px 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--text-normal);
+}
+
+.arcadia-comment-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.arcadia-comment-action {
+	padding: 4px 8px;
+	font-size: 11px;
+	border: none;
+	border-radius: 4px;
+	background-color: var(--background-modifier-hover);
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.arcadia-comment-action:hover {
+	background-color: var(--background-modifier-active-hover);
+	color: var(--text-normal);
+}
+
+.arcadia-comment-delete:hover {
+	background-color: var(--background-modifier-error);
+	color: var(--text-on-accent);
+}
+
+/* Comment Replies */
+.arcadia-comment-replies {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.arcadia-comment-reply {
+	padding: 8px;
+	margin-bottom: 8px;
+	background-color: var(--background-primary);
+	border-radius: 4px;
+}
+
+.arcadia-comment-reply .arcadia-comment-author {
+	font-size: 12px;
+}
+
+.arcadia-comment-reply p {
+	margin: 4px 0 0 0;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+/* ============================================================================
+   COMMENT HIGHLIGHTS IN EDITOR
+   ============================================================================ */
+
+.cm-arcadia-comment-highlight {
+	background-color: rgba(254, 240, 138, 0.3);
+	border-bottom: 2px solid rgba(254, 240, 138, 0.8);
+}
+
+.theme-dark .cm-arcadia-comment-highlight {
+	background-color: rgba(254, 240, 138, 0.15);
+	border-bottom-color: rgba(254, 240, 138, 0.5);
+}
+
+/* Comment marker icon in gutter */
+.cm-arcadia-comment-marker {
+	width: 16px;
+	height: 16px;
+	color: var(--interactive-accent);
+	cursor: pointer;
+}
+
+.cm-arcadia-comment-marker:hover {
+	color: var(--interactive-accent-hover);
+}
+
+/* ============================================================================
+   WORD COUNT STATUS BAR
+   ============================================================================ */
+
+.arcadia-word-count {
+	font-size: 11px;
+	color: var(--text-muted);
+	padding: 0 8px;
+}
+
+/* ============================================================================
+   MODALS
+   ============================================================================ */
+
+.arcadia-modal {
+	padding: 20px;
+}
+
+.arcadia-modal h2 {
+	margin: 0 0 20px 0;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.arcadia-modal-selection {
+	margin-bottom: 16px;
+}
+
+.arcadia-modal-selection label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.arcadia-modal-selection blockquote {
+	margin: 0;
+	padding: 8px 12px;
+	background-color: var(--background-secondary);
+	border-left: 3px solid var(--interactive-accent);
+	border-radius: 4px;
+	font-size: 13px;
+	font-style: italic;
+	color: var(--text-muted);
+	max-height: 100px;
+	overflow-y: auto;
+}
+
+/* ============================================================================
+   DOCUMENT STATISTICS MODAL
+   ============================================================================ */
+
+.arcadia-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.arcadia-stat-item {
+	text-align: center;
+	padding: 16px;
+	background-color: var(--background-secondary);
+	border-radius: 8px;
+}
+
+.arcadia-stat-value {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--interactive-accent);
+	margin-bottom: 4px;
+}
+
+.arcadia-stat-label {
+	font-size: 12px;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   TRACK CHANGES (Phase 2 Preview)
+   ============================================================================ */
+
+.cm-arcadia-insertion {
+	background-color: rgba(152, 195, 121, 0.2);
+	border-bottom: 2px solid rgba(152, 195, 121, 0.8);
+}
+
+.cm-arcadia-deletion {
+	background-color: rgba(231, 130, 132, 0.2);
+	text-decoration: line-through;
+	color: var(--text-muted);
+}
+
+.arcadia-change-marker {
+	width: 4px;
+	height: 100%;
+}
+
+.arcadia-change-marker.insertion {
+	background-color: rgba(152, 195, 121, 0.8);
+}
+
+.arcadia-change-marker.deletion {
+	background-color: rgba(231, 130, 132, 0.8);
+}
+
+/* ============================================================================
+   TABLE OF CONTENTS (Phase 2 Preview)
+   ============================================================================ */
+
+.arcadia-toc {
+	padding: 16px;
+	background-color: var(--background-secondary);
+	border-radius: 8px;
+	margin-bottom: 24px;
+}
+
+.arcadia-toc-title {
+	font-size: 14px;
+	font-weight: 600;
+	margin-bottom: 12px;
+	color: var(--text-normal);
+}
+
+.arcadia-toc-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.arcadia-toc-item {
+	padding: 4px 0;
+}
+
+.arcadia-toc-item a {
+	color: var(--text-muted);
+	text-decoration: none;
+	font-size: 13px;
+}
+
+.arcadia-toc-item a:hover {
+	color: var(--text-normal);
+}
+
+.arcadia-toc-item[data-level="2"] {
+	padding-left: 16px;
+}
+
+.arcadia-toc-item[data-level="3"] {
+	padding-left: 32px;
+}
+
+.arcadia-toc-item[data-level="4"] {
+	padding-left: 48px;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 600px) {
+	.arcadia-author-toolbar {
+		padding: 4px 8px;
+	}
+
+	.arcadia-author-button {
+		width: 24px;
+		height: 24px;
+	}
+
+	.arcadia-comments-panel {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.arcadia-stats-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+	.arcadia-author-toolbar,
+	.arcadia-comments-panel,
+	.arcadia-word-count {
+		display: none !important;
+	}
+
+	/* Show comments as footnotes when printing */
+	.cm-arcadia-comment-highlight {
+		background: none;
+		border-bottom: none;
+	}
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+	.arcadia-author-button,
+	.arcadia-comment-action {
+		transition: none;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	.arcadia-comment {
+		border-left-width: 4px;
+	}
+
+	.cm-arcadia-comment-highlight {
+		background-color: rgba(254, 240, 138, 0.5);
+	}
+}

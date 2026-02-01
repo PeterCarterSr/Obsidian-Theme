@@ -1,0 +1,10 @@
+{
+	"id": "arcadia-toolbar",
+	"name": "Arcadia Toolbar",
+	"version": "1.0.0",
+	"minAppVersion": "0.16.0",
+	"description": "Core formatting toolbar for Obsidian - Bold, Italic, Headings, Lists, Blockquotes, Links, and Scripture blocks. Part of the Arcadia Author suite.",
+	"author": "Peter J. Carter",
+	"authorUrl": "https://theologyinfocus.org",
+	"isDesktopOnly": true
+}

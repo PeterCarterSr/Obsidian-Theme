@@ -1,0 +1,675 @@
+import {
+	App,
+	Editor,
+	MarkdownView,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	setIcon
+} from 'obsidian';
+
+interface ArcadiaToolbarSettings {
+	showBold: boolean;
+	showItalic: boolean;
+	showStrikethrough: boolean;
+	showHighlight: boolean;
+	showHeadings: boolean;
+	showLists: boolean;
+	showBlockquote: boolean;
+	showLink: boolean;
+	showCode: boolean;
+	showScripture: boolean;
+	toolbarPosition: 'top' | 'bottom';
+	scriptureTranslation: string;
+}
+
+const DEFAULT_SETTINGS: ArcadiaToolbarSettings = {
+	showBold: true,
+	showItalic: true,
+	showStrikethrough: true,
+	showHighlight: true,
+	showHeadings: true,
+	showLists: true,
+	showBlockquote: true,
+	showLink: true,
+	showCode: true,
+	showScripture: true,
+	toolbarPosition: 'top',
+	scriptureTranslation: 'ESV'
+};
+
+interface ToolbarButton {
+	id: string;
+	icon: string;
+	tooltip: string;
+	action: (editor: Editor) => void;
+	settingKey?: keyof ArcadiaToolbarSettings;
+}
+
+export default class ArcadiaToolbarPlugin extends Plugin {
+	settings: ArcadiaToolbarSettings;
+	toolbarEl: HTMLElement | null = null;
+
+	async onload() {
+		await this.loadSettings();
+
+		// Register editor extension for toolbar
+		this.registerEvent(
+			this.app.workspace.on('active-leaf-change', () => {
+				this.updateToolbar();
+			})
+		);
+
+		this.registerEvent(
+			this.app.workspace.on('layout-change', () => {
+				this.updateToolbar();
+			})
+		);
+
+		// Add commands for keyboard shortcuts
+		this.addCommand({
+			id: 'toggle-bold',
+			name: 'Toggle Bold',
+			icon: 'bold',
+			editorCallback: (editor: Editor) => this.toggleBold(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-italic',
+			name: 'Toggle Italic',
+			icon: 'italic',
+			editorCallback: (editor: Editor) => this.toggleItalic(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-strikethrough',
+			name: 'Toggle Strikethrough',
+			icon: 'strikethrough',
+			editorCallback: (editor: Editor) => this.toggleStrikethrough(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-highlight',
+			name: 'Toggle Highlight',
+			icon: 'highlighter',
+			editorCallback: (editor: Editor) => this.toggleHighlight(editor)
+		});
+
+		this.addCommand({
+			id: 'insert-heading-1',
+			name: 'Insert Heading 1',
+			icon: 'heading-1',
+			editorCallback: (editor: Editor) => this.insertHeading(editor, 1)
+		});
+
+		this.addCommand({
+			id: 'insert-heading-2',
+			name: 'Insert Heading 2',
+			icon: 'heading-2',
+			editorCallback: (editor: Editor) => this.insertHeading(editor, 2)
+		});
+
+		this.addCommand({
+			id: 'insert-heading-3',
+			name: 'Insert Heading 3',
+			icon: 'heading-3',
+			editorCallback: (editor: Editor) => this.insertHeading(editor, 3)
+		});
+
+		this.addCommand({
+			id: 'toggle-bullet-list',
+			name: 'Toggle Bullet List',
+			icon: 'list',
+			editorCallback: (editor: Editor) => this.toggleBulletList(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-numbered-list',
+			name: 'Toggle Numbered List',
+			icon: 'list-ordered',
+			editorCallback: (editor: Editor) => this.toggleNumberedList(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-blockquote',
+			name: 'Toggle Blockquote',
+			icon: 'quote',
+			editorCallback: (editor: Editor) => this.toggleBlockquote(editor)
+		});
+
+		this.addCommand({
+			id: 'insert-link',
+			name: 'Insert Link',
+			icon: 'link',
+			editorCallback: (editor: Editor) => this.insertLink(editor)
+		});
+
+		this.addCommand({
+			id: 'toggle-inline-code',
+			name: 'Toggle Inline Code',
+			icon: 'code',
+			editorCallback: (editor: Editor) => this.toggleInlineCode(editor)
+		});
+
+		this.addCommand({
+			id: 'insert-code-block',
+			name: 'Insert Code Block',
+			icon: 'code-2',
+			editorCallback: (editor: Editor) => this.insertCodeBlock(editor)
+		});
+
+		this.addCommand({
+			id: 'insert-scripture-block',
+			name: 'Insert Scripture Block',
+			icon: 'book-open',
+			editorCallback: (editor: Editor) => this.insertScriptureBlock(editor)
+		});
+
+		// Add settings tab
+		this.addSettingTab(new ArcadiaToolbarSettingTab(this.app, this));
+
+		// Initial toolbar setup
+		this.app.workspace.onLayoutReady(() => {
+			this.updateToolbar();
+		});
+	}
+
+	onunload() {
+		this.removeToolbar();
+	}
+
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
+		this.updateToolbar();
+	}
+
+	removeToolbar() {
+		if (this.toolbarEl) {
+			this.toolbarEl.remove();
+			this.toolbarEl = null;
+		}
+	}
+
+	updateToolbar() {
+		this.removeToolbar();
+
+		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!activeView) return;
+
+		const editorEl = activeView.containerEl.querySelector('.cm-editor');
+		if (!editorEl) return;
+
+		// Create toolbar
+		this.toolbarEl = createEl('div', { cls: 'arcadia-toolbar' });
+
+		// Define toolbar buttons
+		const buttons: ToolbarButton[] = [
+			{
+				id: 'bold',
+				icon: 'bold',
+				tooltip: 'Bold (Ctrl/Cmd+B)',
+				action: (editor) => this.toggleBold(editor),
+				settingKey: 'showBold'
+			},
+			{
+				id: 'italic',
+				icon: 'italic',
+				tooltip: 'Italic (Ctrl/Cmd+I)',
+				action: (editor) => this.toggleItalic(editor),
+				settingKey: 'showItalic'
+			},
+			{
+				id: 'strikethrough',
+				icon: 'strikethrough',
+				tooltip: 'Strikethrough',
+				action: (editor) => this.toggleStrikethrough(editor),
+				settingKey: 'showStrikethrough'
+			},
+			{
+				id: 'highlight',
+				icon: 'highlighter',
+				tooltip: 'Highlight',
+				action: (editor) => this.toggleHighlight(editor),
+				settingKey: 'showHighlight'
+			},
+			{ id: 'separator-1', icon: '', tooltip: '', action: () => {} },
+			{
+				id: 'heading-1',
+				icon: 'heading-1',
+				tooltip: 'Heading 1',
+				action: (editor) => this.insertHeading(editor, 1),
+				settingKey: 'showHeadings'
+			},
+			{
+				id: 'heading-2',
+				icon: 'heading-2',
+				tooltip: 'Heading 2',
+				action: (editor) => this.insertHeading(editor, 2),
+				settingKey: 'showHeadings'
+			},
+			{
+				id: 'heading-3',
+				icon: 'heading-3',
+				tooltip: 'Heading 3',
+				action: (editor) => this.insertHeading(editor, 3),
+				settingKey: 'showHeadings'
+			},
+			{ id: 'separator-2', icon: '', tooltip: '', action: () => {} },
+			{
+				id: 'bullet-list',
+				icon: 'list',
+				tooltip: 'Bullet List',
+				action: (editor) => this.toggleBulletList(editor),
+				settingKey: 'showLists'
+			},
+			{
+				id: 'numbered-list',
+				icon: 'list-ordered',
+				tooltip: 'Numbered List',
+				action: (editor) => this.toggleNumberedList(editor),
+				settingKey: 'showLists'
+			},
+			{
+				id: 'blockquote',
+				icon: 'quote',
+				tooltip: 'Blockquote',
+				action: (editor) => this.toggleBlockquote(editor),
+				settingKey: 'showBlockquote'
+			},
+			{ id: 'separator-3', icon: '', tooltip: '', action: () => {} },
+			{
+				id: 'link',
+				icon: 'link',
+				tooltip: 'Insert Link',
+				action: (editor) => this.insertLink(editor),
+				settingKey: 'showLink'
+			},
+			{
+				id: 'inline-code',
+				icon: 'code',
+				tooltip: 'Inline Code',
+				action: (editor) => this.toggleInlineCode(editor),
+				settingKey: 'showCode'
+			},
+			{
+				id: 'code-block',
+				icon: 'code-2',
+				tooltip: 'Code Block',
+				action: (editor) => this.insertCodeBlock(editor),
+				settingKey: 'showCode'
+			},
+			{ id: 'separator-4', icon: '', tooltip: '', action: () => {} },
+			{
+				id: 'scripture',
+				icon: 'book-open',
+				tooltip: 'Insert Scripture Block',
+				action: (editor) => this.insertScriptureBlock(editor),
+				settingKey: 'showScripture'
+			}
+		];
+
+		// Create buttons
+		buttons.forEach(btn => {
+			if (btn.id.startsWith('separator')) {
+				const separator = this.toolbarEl!.createEl('div', { cls: 'arcadia-toolbar-separator' });
+				return;
+			}
+
+			// Check if button should be shown based on settings
+			if (btn.settingKey && !this.settings[btn.settingKey]) {
+				return;
+			}
+
+			const buttonEl = this.toolbarEl!.createEl('button', {
+				cls: 'arcadia-toolbar-button',
+				attr: { 'aria-label': btn.tooltip, title: btn.tooltip }
+			});
+			setIcon(buttonEl, btn.icon);
+
+			buttonEl.addEventListener('click', (e) => {
+				e.preventDefault();
+				const editor = activeView.editor;
+				if (editor) {
+					btn.action(editor);
+				}
+			});
+		});
+
+		// Insert toolbar into DOM
+		const cmScroller = editorEl.querySelector('.cm-scroller');
+		if (cmScroller && this.settings.toolbarPosition === 'top') {
+			editorEl.insertBefore(this.toolbarEl, cmScroller);
+		} else if (cmScroller) {
+			editorEl.appendChild(this.toolbarEl);
+		}
+	}
+
+	// === Formatting Functions ===
+
+	toggleBold(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			if (selection.startsWith('**') && selection.endsWith('**')) {
+				editor.replaceSelection(selection.slice(2, -2));
+			} else {
+				editor.replaceSelection(`**${selection}**`);
+			}
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('****', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+		}
+	}
+
+	toggleItalic(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			if (selection.startsWith('*') && selection.endsWith('*') &&
+				!selection.startsWith('**')) {
+				editor.replaceSelection(selection.slice(1, -1));
+			} else {
+				editor.replaceSelection(`*${selection}*`);
+			}
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('**', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+		}
+	}
+
+	toggleStrikethrough(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			if (selection.startsWith('~~') && selection.endsWith('~~')) {
+				editor.replaceSelection(selection.slice(2, -2));
+			} else {
+				editor.replaceSelection(`~~${selection}~~`);
+			}
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('~~~~', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+		}
+	}
+
+	toggleHighlight(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			if (selection.startsWith('==') && selection.endsWith('==')) {
+				editor.replaceSelection(selection.slice(2, -2));
+			} else {
+				editor.replaceSelection(`==${selection}==`);
+			}
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('====', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+		}
+	}
+
+	insertHeading(editor: Editor, level: number) {
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+		const headingPrefix = '#'.repeat(level) + ' ';
+
+		// Check if line already has a heading
+		const headingMatch = line.match(/^(#{1,6})\s/);
+		if (headingMatch) {
+			// Replace existing heading
+			const newLine = headingPrefix + line.slice(headingMatch[0].length);
+			editor.setLine(cursor.line, newLine);
+		} else {
+			// Add heading to start of line
+			editor.setLine(cursor.line, headingPrefix + line);
+		}
+	}
+
+	toggleBulletList(editor: Editor) {
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+
+		if (line.match(/^(\s*)- /)) {
+			// Remove bullet
+			editor.setLine(cursor.line, line.replace(/^(\s*)- /, '$1'));
+		} else if (line.match(/^(\s*)\d+\. /)) {
+			// Convert numbered to bullet
+			editor.setLine(cursor.line, line.replace(/^(\s*)\d+\. /, '$1- '));
+		} else {
+			// Add bullet
+			const indent = line.match(/^(\s*)/)?.[0] || '';
+			editor.setLine(cursor.line, indent + '- ' + line.trimStart());
+		}
+	}
+
+	toggleNumberedList(editor: Editor) {
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+
+		if (line.match(/^(\s*)\d+\. /)) {
+			// Remove number
+			editor.setLine(cursor.line, line.replace(/^(\s*)\d+\. /, '$1'));
+		} else if (line.match(/^(\s*)- /)) {
+			// Convert bullet to numbered
+			editor.setLine(cursor.line, line.replace(/^(\s*)- /, '$11. '));
+		} else {
+			// Add number
+			const indent = line.match(/^(\s*)/)?.[0] || '';
+			editor.setLine(cursor.line, indent + '1. ' + line.trimStart());
+		}
+	}
+
+	toggleBlockquote(editor: Editor) {
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+
+		if (line.startsWith('> ')) {
+			editor.setLine(cursor.line, line.slice(2));
+		} else {
+			editor.setLine(cursor.line, '> ' + line);
+		}
+	}
+
+	insertLink(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			// If there's a URL in clipboard, use it
+			editor.replaceSelection(`[${selection}](url)`);
+			// Select 'url' for easy replacement
+			const cursor = editor.getCursor();
+			editor.setSelection(
+				{ line: cursor.line, ch: cursor.ch - 4 },
+				{ line: cursor.line, ch: cursor.ch - 1 }
+			);
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('[](url)', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+		}
+	}
+
+	toggleInlineCode(editor: Editor) {
+		const selection = editor.getSelection();
+		if (selection) {
+			if (selection.startsWith('`') && selection.endsWith('`')) {
+				editor.replaceSelection(selection.slice(1, -1));
+			} else {
+				editor.replaceSelection(`\`${selection}\``);
+			}
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange('``', cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+		}
+	}
+
+	insertCodeBlock(editor: Editor) {
+		const selection = editor.getSelection();
+		const cursor = editor.getCursor();
+
+		if (selection) {
+			editor.replaceSelection(`\`\`\`\n${selection}\n\`\`\``);
+		} else {
+			editor.replaceRange('```\n\n```', cursor);
+			editor.setCursor({ line: cursor.line + 1, ch: 0 });
+		}
+	}
+
+	insertScriptureBlock(editor: Editor) {
+		const cursor = editor.getCursor();
+		const translation = this.settings.scriptureTranslation;
+
+		const scriptureBlock = `> [!scripture] Scripture Reference
+> **Book Chapter:Verse (${translation})**
+>
+> Enter scripture text here...
+`;
+
+		editor.replaceRange(scriptureBlock, cursor);
+		// Position cursor at the reference line for easy editing
+		editor.setCursor({ line: cursor.line + 1, ch: 3 });
+	}
+}
+
+class ArcadiaToolbarSettingTab extends PluginSettingTab {
+	plugin: ArcadiaToolbarPlugin;
+
+	constructor(app: App, plugin: ArcadiaToolbarPlugin) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		const { containerEl } = this;
+		containerEl.empty();
+
+		containerEl.createEl('h2', { text: 'Arcadia Toolbar Settings' });
+
+		new Setting(containerEl)
+			.setName('Toolbar position')
+			.setDesc('Where to display the formatting toolbar')
+			.addDropdown(dropdown => dropdown
+				.addOption('top', 'Top of editor')
+				.addOption('bottom', 'Bottom of editor')
+				.setValue(this.plugin.settings.toolbarPosition)
+				.onChange(async (value) => {
+					this.plugin.settings.toolbarPosition = value as 'top' | 'bottom';
+					await this.plugin.saveSettings();
+				}));
+
+		containerEl.createEl('h3', { text: 'Toolbar Buttons' });
+
+		new Setting(containerEl)
+			.setName('Show Bold button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showBold)
+				.onChange(async (value) => {
+					this.plugin.settings.showBold = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Italic button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showItalic)
+				.onChange(async (value) => {
+					this.plugin.settings.showItalic = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Strikethrough button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showStrikethrough)
+				.onChange(async (value) => {
+					this.plugin.settings.showStrikethrough = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Highlight button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showHighlight)
+				.onChange(async (value) => {
+					this.plugin.settings.showHighlight = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Heading buttons')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showHeadings)
+				.onChange(async (value) => {
+					this.plugin.settings.showHeadings = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show List buttons')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showLists)
+				.onChange(async (value) => {
+					this.plugin.settings.showLists = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Blockquote button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showBlockquote)
+				.onChange(async (value) => {
+					this.plugin.settings.showBlockquote = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Link button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showLink)
+				.onChange(async (value) => {
+					this.plugin.settings.showLink = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Code buttons')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showCode)
+				.onChange(async (value) => {
+					this.plugin.settings.showCode = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show Scripture button')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showScripture)
+				.onChange(async (value) => {
+					this.plugin.settings.showScripture = value;
+					await this.plugin.saveSettings();
+				}));
+
+		containerEl.createEl('h3', { text: 'Scripture Settings' });
+
+		new Setting(containerEl)
+			.setName('Default translation')
+			.setDesc('Default Bible translation for scripture blocks')
+			.addDropdown(dropdown => dropdown
+				.addOption('ESV', 'ESV - English Standard Version')
+				.addOption('NIV', 'NIV - New International Version')
+				.addOption('KJV', 'KJV - King James Version')
+				.addOption('NASB', 'NASB - New American Standard Bible')
+				.addOption('NLT', 'NLT - New Living Translation')
+				.addOption('CSB', 'CSB - Christian Standard Bible')
+				.addOption('NKJV', 'NKJV - New King James Version')
+				.addOption('RSV', 'RSV - Revised Standard Version')
+				.setValue(this.plugin.settings.scriptureTranslation)
+				.onChange(async (value) => {
+					this.plugin.settings.scriptureTranslation = value;
+					await this.plugin.saveSettings();
+				}));
+	}
+}
