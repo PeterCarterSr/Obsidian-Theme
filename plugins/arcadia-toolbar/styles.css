@@ -1,8 +1,5 @@
 /* ================================================================================
    ARCADIA TOOLBAR STYLES
-
-   Formatting toolbar styling for the Arcadia Author plugin suite.
-   Designed to complement the Arcadia CSS theme.
    ================================================================================ */
 
 /* Toolbar Container */
@@ -19,7 +16,6 @@
 	z-index: 10;
 }
 
-/* When toolbar is at bottom */
 .arcadia-toolbar:last-child {
 	border-bottom: none;
 	border-top: 1px solid var(--background-modifier-border);
@@ -30,9 +26,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 32px;
+	min-width: 32px;
 	height: 32px;
-	padding: 0;
+	padding: 0 4px;
 	border: none;
 	border-radius: 4px;
 	background-color: transparent;
@@ -64,91 +60,149 @@
 	background-color: var(--background-modifier-border);
 }
 
-/* Active/Pressed State */
-.arcadia-toolbar-button.is-active {
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-}
+/* ================================================================================
+   DROPDOWN STYLES
+   ================================================================================ */
 
-/* Disabled State */
-.arcadia-toolbar-button:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-}
-
-/* Focus State for Accessibility */
-.arcadia-toolbar-button:focus-visible {
-	outline: 2px solid var(--interactive-accent);
-	outline-offset: 2px;
-}
-
-/* Tooltip Styles */
-.arcadia-toolbar-button[aria-label]:hover::after {
-	content: attr(aria-label);
-	position: absolute;
-	bottom: -28px;
-	left: 50%;
-	transform: translateX(-50%);
-	padding: 4px 8px;
-	background-color: var(--background-primary);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	font-size: 12px;
-	white-space: nowrap;
-	pointer-events: none;
-	z-index: 100;
-}
-
-/* Dropdown Menu for Headings (future enhancement) */
 .arcadia-toolbar-dropdown {
+	position: relative;
+	display: inline-flex;
+}
+
+.arcadia-toolbar-dropdown-trigger {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 0 6px;
 	position: relative;
 }
 
-.arcadia-toolbar-dropdown-menu {
+/* Color button with indicator bar */
+.arcadia-color-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.arcadia-color-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.arcadia-color-bar {
+	position: absolute;
+	bottom: 4px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 16px;
+	height: 3px;
+	border-radius: 1px;
+}
+
+/* Dropdown arrow */
+.arcadia-dropdown-arrow {
+	font-size: 8px;
+	margin-left: 2px;
+	opacity: 0.6;
+}
+
+/* Dropdown Menu */
+.arcadia-dropdown-menu {
 	position: absolute;
 	top: 100%;
 	left: 0;
-	min-width: 120px;
-	padding: 4px;
+	margin-top: 4px;
+	padding: 8px;
 	background-color: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	z-index: 100;
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	z-index: 1000;
+	min-width: 200px;
 }
 
-.arcadia-toolbar-dropdown-item {
-	display: block;
-	width: 100%;
-	padding: 6px 12px;
-	text-align: left;
-	background: none;
-	border: none;
-	border-radius: 4px;
-	color: var(--text-normal);
-	cursor: pointer;
-}
-
-.arcadia-toolbar-dropdown-item:hover {
-	background-color: var(--background-modifier-hover);
-}
-
-/* Scripture Callout Styling (integrates with theme) */
-.callout[data-callout="scripture"] {
-	--callout-color: 139, 115, 85;
-	--callout-icon: book-open;
-	border-left-width: 4px;
-}
-
-.callout[data-callout="scripture"] .callout-title {
+.arcadia-dropdown-title {
+	font-size: 11px;
 	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 8px;
+	padding: 0 4px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
-.callout[data-callout="scripture"] .callout-content {
-	font-style: italic;
+/* Color Grid */
+.arcadia-color-grid {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	gap: 3px;
 }
 
-/* Responsive Design */
+.arcadia-color-swatch {
+	width: 20px;
+	height: 20px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 3px;
+	cursor: pointer;
+	transition: transform 0.1s ease, box-shadow 0.1s ease;
+	padding: 0;
+	font-size: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.arcadia-color-swatch:hover {
+	transform: scale(1.2);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+	position: relative;
+}
+
+.arcadia-color-swatch:active {
+	transform: scale(1.1);
+}
+
+/* Alignment Grid */
+.arcadia-align-grid {
+	display: flex;
+	gap: 4px;
+}
+
+.arcadia-align-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.arcadia-align-button:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+	border-color: var(--interactive-accent);
+}
+
+.arcadia-align-button:active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.arcadia-align-button svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* ================================================================================
+   RESPONSIVE DESIGN
+   ================================================================================ */
+
 @media (max-width: 600px) {
 	.arcadia-toolbar {
 		padding: 6px 8px;
@@ -156,7 +210,7 @@
 	}
 
 	.arcadia-toolbar-button {
-		width: 28px;
+		min-width: 28px;
 		height: 28px;
 	}
 
@@ -169,11 +223,34 @@
 		height: 20px;
 		margin: 0 4px;
 	}
+
+	.arcadia-color-grid {
+		grid-template-columns: repeat(6, 1fr);
+	}
+
+	.arcadia-dropdown-menu {
+		min-width: 150px;
+	}
 }
 
-/* Print Styles - Hide toolbar when printing */
+/* ================================================================================
+   PRINT STYLES
+   ================================================================================ */
+
 @media print {
 	.arcadia-toolbar {
 		display: none !important;
 	}
+}
+
+/* ================================================================================
+   DARK THEME ADJUSTMENTS
+   ================================================================================ */
+
+.theme-dark .arcadia-color-swatch {
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .arcadia-dropdown-menu {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }

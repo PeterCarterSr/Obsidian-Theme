@@ -19,12 +19,15 @@ interface ArcadiaToolbarSettings {
 	showSubscript: boolean;
 	showSuperscript: boolean;
 	showClearFormatting: boolean;
+	showFontColor: boolean;
+	showBackgroundColor: boolean;
 	// Structure
 	showHeadings: boolean;
 	showLists: boolean;
 	showChecklist: boolean;
 	showBlockquote: boolean;
 	showIndent: boolean;
+	showAlignment: boolean;
 	showHorizontalRule: boolean;
 	// Insert
 	showLink: boolean;
@@ -36,6 +39,8 @@ interface ArcadiaToolbarSettings {
 	// Settings
 	toolbarPosition: 'top' | 'bottom';
 	scriptureTranslation: string;
+	lastFontColor: string;
+	lastBackgroundColor: string;
 }
 
 const DEFAULT_SETTINGS: ArcadiaToolbarSettings = {
@@ -49,12 +54,15 @@ const DEFAULT_SETTINGS: ArcadiaToolbarSettings = {
 	showSubscript: true,
 	showSuperscript: true,
 	showClearFormatting: true,
+	showFontColor: true,
+	showBackgroundColor: true,
 	// Structure
 	showHeadings: true,
 	showLists: true,
 	showChecklist: true,
 	showBlockquote: true,
 	showIndent: true,
+	showAlignment: true,
 	showHorizontalRule: true,
 	// Insert
 	showLink: true,
@@ -65,8 +73,42 @@ const DEFAULT_SETTINGS: ArcadiaToolbarSettings = {
 	showCallout: true,
 	// Settings
 	toolbarPosition: 'top',
-	scriptureTranslation: 'ESV'
+	scriptureTranslation: 'ESV',
+	lastFontColor: '#ff0000',
+	lastBackgroundColor: '#ffff00'
 };
+
+// Color palettes
+const FONT_COLORS = [
+	// Row 1 - Dark colors
+	'#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+	// Row 2 - Theme colors
+	'#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+	// Row 3 - Light variants
+	'#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+	// Row 4 - Medium variants
+	'#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd',
+	// Row 5 - Standard colors
+	'#cc4125', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0',
+	// Row 6 - Dark variants
+	'#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7', '#a64d79',
+	// Row 7 - Darker variants
+	'#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#1155cc', '#0b5394', '#351c75', '#741b47',
+	// Row 8 - Darkest variants
+	'#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#1c4587', '#073763', '#20124d', '#4c1130'
+];
+
+const BACKGROUND_COLORS = [
+	// Translucent/light
+	'transparent', '#ffffff', '#f5f5f5', '#e0e0e0', '#bdbdbd', '#9e9e9e',
+	// Highlighter colors - bright
+	'#ffff00', '#00ff00', '#00ffff', '#ff00ff', '#ff0000', '#0000ff',
+	// Highlighter colors - pastel
+	'#fff59d', '#c5e1a5', '#80deea', '#ce93d8', '#ef9a9a', '#90caf9',
+	// Custom colors
+	'#ffccbc', '#ffe0b2', '#fff9c4', '#dcedc8', '#b2dfdb', '#b3e5fc',
+	'#e1bee7', '#f8bbd0', '#ffcdd2', '#d7ccc8', '#cfd8dc', '#b0bec5'
+];
 
 interface ToolbarButton {
 	id: string;
@@ -74,16 +116,27 @@ interface ToolbarButton {
 	tooltip: string;
 	action: (editor: Editor) => void;
 	settingKey?: keyof ArcadiaToolbarSettings;
+	hasDropdown?: boolean;
 }
 
 export default class ArcadiaToolbarPlugin extends Plugin {
 	settings: ArcadiaToolbarSettings;
 	toolbarEl: HTMLElement | null = null;
+	activeDropdown: HTMLElement | null = null;
 
 	async onload() {
 		await this.loadSettings();
 
-		// Register editor extension for toolbar
+		// Close dropdowns when clicking outside
+		this.registerDomEvent(document, 'click', (e: MouseEvent) => {
+			if (this.activeDropdown && !this.activeDropdown.contains(e.target as Node)) {
+				const parent = (e.target as HTMLElement).closest('.arcadia-toolbar-dropdown');
+				if (!parent) {
+					this.closeDropdowns();
+				}
+			}
+		});
+
 		this.registerEvent(
 			this.app.workspace.on('active-leaf-change', () => {
 				this.updateToolbar();
@@ -96,13 +149,9 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 			})
 		);
 
-		// Add all commands for keyboard shortcuts
 		this.registerCommands();
-
-		// Add settings tab
 		this.addSettingTab(new ArcadiaToolbarSettingTab(this.app, this));
 
-		// Initial toolbar setup
 		this.app.workspace.onLayoutReady(() => {
 			this.updateToolbar();
 		});
@@ -110,190 +159,49 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 
 	registerCommands() {
 		// Undo/Redo
-		this.addCommand({
-			id: 'undo',
-			name: 'Undo',
-			editorCallback: (editor: Editor) => this.undo(editor)
-		});
-
-		this.addCommand({
-			id: 'redo',
-			name: 'Redo',
-			editorCallback: (editor: Editor) => this.redo(editor)
-		});
+		this.addCommand({ id: 'undo', name: 'Undo', editorCallback: (editor: Editor) => this.undo(editor) });
+		this.addCommand({ id: 'redo', name: 'Redo', editorCallback: (editor: Editor) => this.redo(editor) });
 
 		// Text formatting
-		this.addCommand({
-			id: 'toggle-bold',
-			name: 'Toggle Bold',
-			editorCallback: (editor: Editor) => this.toggleBold(editor)
-		});
+		this.addCommand({ id: 'toggle-bold', name: 'Toggle Bold', editorCallback: (editor: Editor) => this.toggleBold(editor) });
+		this.addCommand({ id: 'toggle-italic', name: 'Toggle Italic', editorCallback: (editor: Editor) => this.toggleItalic(editor) });
+		this.addCommand({ id: 'toggle-underline', name: 'Toggle Underline', editorCallback: (editor: Editor) => this.toggleUnderline(editor) });
+		this.addCommand({ id: 'toggle-strikethrough', name: 'Toggle Strikethrough', editorCallback: (editor: Editor) => this.toggleStrikethrough(editor) });
+		this.addCommand({ id: 'toggle-highlight', name: 'Toggle Highlight', editorCallback: (editor: Editor) => this.toggleHighlight(editor) });
+		this.addCommand({ id: 'toggle-subscript', name: 'Toggle Subscript', editorCallback: (editor: Editor) => this.toggleSubscript(editor) });
+		this.addCommand({ id: 'toggle-superscript', name: 'Toggle Superscript', editorCallback: (editor: Editor) => this.toggleSuperscript(editor) });
+		this.addCommand({ id: 'clear-formatting', name: 'Clear Formatting', editorCallback: (editor: Editor) => this.clearFormatting(editor) });
 
-		this.addCommand({
-			id: 'toggle-italic',
-			name: 'Toggle Italic',
-			editorCallback: (editor: Editor) => this.toggleItalic(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-underline',
-			name: 'Toggle Underline',
-			editorCallback: (editor: Editor) => this.toggleUnderline(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-strikethrough',
-			name: 'Toggle Strikethrough',
-			editorCallback: (editor: Editor) => this.toggleStrikethrough(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-highlight',
-			name: 'Toggle Highlight',
-			editorCallback: (editor: Editor) => this.toggleHighlight(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-subscript',
-			name: 'Toggle Subscript',
-			editorCallback: (editor: Editor) => this.toggleSubscript(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-superscript',
-			name: 'Toggle Superscript',
-			editorCallback: (editor: Editor) => this.toggleSuperscript(editor)
-		});
-
-		this.addCommand({
-			id: 'clear-formatting',
-			name: 'Clear Formatting',
-			editorCallback: (editor: Editor) => this.clearFormatting(editor)
-		});
+		// Alignment
+		this.addCommand({ id: 'align-left', name: 'Align Left', editorCallback: (editor: Editor) => this.setAlignment(editor, 'left') });
+		this.addCommand({ id: 'align-center', name: 'Align Center', editorCallback: (editor: Editor) => this.setAlignment(editor, 'center') });
+		this.addCommand({ id: 'align-right', name: 'Align Right', editorCallback: (editor: Editor) => this.setAlignment(editor, 'right') });
+		this.addCommand({ id: 'align-justify', name: 'Align Justify', editorCallback: (editor: Editor) => this.setAlignment(editor, 'justify') });
 
 		// Headings
-		this.addCommand({
-			id: 'insert-heading-1',
-			name: 'Insert Heading 1',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 1)
-		});
-
-		this.addCommand({
-			id: 'insert-heading-2',
-			name: 'Insert Heading 2',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 2)
-		});
-
-		this.addCommand({
-			id: 'insert-heading-3',
-			name: 'Insert Heading 3',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 3)
-		});
-
-		this.addCommand({
-			id: 'insert-heading-4',
-			name: 'Insert Heading 4',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 4)
-		});
-
-		this.addCommand({
-			id: 'insert-heading-5',
-			name: 'Insert Heading 5',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 5)
-		});
-
-		this.addCommand({
-			id: 'insert-heading-6',
-			name: 'Insert Heading 6',
-			editorCallback: (editor: Editor) => this.insertHeading(editor, 6)
-		});
+		for (let i = 1; i <= 6; i++) {
+			this.addCommand({ id: `insert-heading-${i}`, name: `Insert Heading ${i}`, editorCallback: (editor: Editor) => this.insertHeading(editor, i) });
+		}
 
 		// Lists
-		this.addCommand({
-			id: 'toggle-bullet-list',
-			name: 'Toggle Bullet List',
-			editorCallback: (editor: Editor) => this.toggleBulletList(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-numbered-list',
-			name: 'Toggle Numbered List',
-			editorCallback: (editor: Editor) => this.toggleNumberedList(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-checklist',
-			name: 'Toggle Checklist',
-			editorCallback: (editor: Editor) => this.toggleChecklist(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-blockquote',
-			name: 'Toggle Blockquote',
-			editorCallback: (editor: Editor) => this.toggleBlockquote(editor)
-		});
+		this.addCommand({ id: 'toggle-bullet-list', name: 'Toggle Bullet List', editorCallback: (editor: Editor) => this.toggleBulletList(editor) });
+		this.addCommand({ id: 'toggle-numbered-list', name: 'Toggle Numbered List', editorCallback: (editor: Editor) => this.toggleNumberedList(editor) });
+		this.addCommand({ id: 'toggle-checklist', name: 'Toggle Checklist', editorCallback: (editor: Editor) => this.toggleChecklist(editor) });
+		this.addCommand({ id: 'toggle-blockquote', name: 'Toggle Blockquote', editorCallback: (editor: Editor) => this.toggleBlockquote(editor) });
 
 		// Indentation
-		this.addCommand({
-			id: 'indent',
-			name: 'Indent',
-			editorCallback: (editor: Editor) => this.indent(editor)
-		});
-
-		this.addCommand({
-			id: 'outdent',
-			name: 'Outdent',
-			editorCallback: (editor: Editor) => this.outdent(editor)
-		});
+		this.addCommand({ id: 'indent', name: 'Indent', editorCallback: (editor: Editor) => this.indent(editor) });
+		this.addCommand({ id: 'outdent', name: 'Outdent', editorCallback: (editor: Editor) => this.outdent(editor) });
 
 		// Insert elements
-		this.addCommand({
-			id: 'insert-horizontal-rule',
-			name: 'Insert Horizontal Rule',
-			editorCallback: (editor: Editor) => this.insertHorizontalRule(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-link',
-			name: 'Insert Link',
-			editorCallback: (editor: Editor) => this.insertLink(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-image',
-			name: 'Insert Image',
-			editorCallback: (editor: Editor) => this.insertImage(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-table',
-			name: 'Insert Table',
-			editorCallback: (editor: Editor) => this.insertTable(editor)
-		});
-
-		this.addCommand({
-			id: 'toggle-inline-code',
-			name: 'Toggle Inline Code',
-			editorCallback: (editor: Editor) => this.toggleInlineCode(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-code-block',
-			name: 'Insert Code Block',
-			editorCallback: (editor: Editor) => this.insertCodeBlock(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-callout',
-			name: 'Insert Callout',
-			editorCallback: (editor: Editor) => this.insertCallout(editor)
-		});
-
-		this.addCommand({
-			id: 'insert-scripture-block',
-			name: 'Insert Scripture Block',
-			editorCallback: (editor: Editor) => this.insertScriptureBlock(editor)
-		});
+		this.addCommand({ id: 'insert-horizontal-rule', name: 'Insert Horizontal Rule', editorCallback: (editor: Editor) => this.insertHorizontalRule(editor) });
+		this.addCommand({ id: 'insert-link', name: 'Insert Link', editorCallback: (editor: Editor) => this.insertLink(editor) });
+		this.addCommand({ id: 'insert-image', name: 'Insert Image', editorCallback: (editor: Editor) => this.insertImage(editor) });
+		this.addCommand({ id: 'insert-table', name: 'Insert Table', editorCallback: (editor: Editor) => this.insertTable(editor) });
+		this.addCommand({ id: 'toggle-inline-code', name: 'Toggle Inline Code', editorCallback: (editor: Editor) => this.toggleInlineCode(editor) });
+		this.addCommand({ id: 'insert-code-block', name: 'Insert Code Block', editorCallback: (editor: Editor) => this.insertCodeBlock(editor) });
+		this.addCommand({ id: 'insert-callout', name: 'Insert Callout', editorCallback: (editor: Editor) => this.insertCallout(editor) });
+		this.addCommand({ id: 'insert-scripture-block', name: 'Insert Scripture Block', editorCallback: (editor: Editor) => this.insertScriptureBlock(editor) });
 	}
 
 	onunload() {
@@ -316,6 +224,13 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		}
 	}
 
+	closeDropdowns() {
+		if (this.activeDropdown) {
+			this.activeDropdown.remove();
+			this.activeDropdown = null;
+		}
+	}
+
 	updateToolbar() {
 		this.removeToolbar();
 
@@ -325,244 +240,71 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		const editorEl = activeView.containerEl.querySelector('.cm-editor');
 		if (!editorEl) return;
 
-		// Create toolbar using standard DOM methods
 		this.toolbarEl = document.createElement('div');
 		this.toolbarEl.className = 'arcadia-toolbar';
 
-		// Define toolbar buttons
 		const buttons: ToolbarButton[] = [
 			// Undo/Redo
-			{
-				id: 'undo',
-				icon: 'undo',
-				tooltip: 'Undo (Ctrl/Cmd+Z)',
-				action: (editor) => this.undo(editor),
-				settingKey: 'showUndo'
-			},
-			{
-				id: 'redo',
-				icon: 'redo',
-				tooltip: 'Redo (Ctrl/Cmd+Y)',
-				action: (editor) => this.redo(editor),
-				settingKey: 'showUndo'
-			},
+			{ id: 'undo', icon: 'undo', tooltip: 'Undo', action: (e) => this.undo(e), settingKey: 'showUndo' },
+			{ id: 'redo', icon: 'redo', tooltip: 'Redo', action: (e) => this.redo(e), settingKey: 'showUndo' },
 			{ id: 'separator-0', icon: '', tooltip: '', action: () => {} },
 
 			// Text Formatting
-			{
-				id: 'bold',
-				icon: 'bold',
-				tooltip: 'Bold (Ctrl/Cmd+B)',
-				action: (editor) => this.toggleBold(editor),
-				settingKey: 'showBold'
-			},
-			{
-				id: 'italic',
-				icon: 'italic',
-				tooltip: 'Italic (Ctrl/Cmd+I)',
-				action: (editor) => this.toggleItalic(editor),
-				settingKey: 'showItalic'
-			},
-			{
-				id: 'underline',
-				icon: 'underline',
-				tooltip: 'Underline (Ctrl/Cmd+U)',
-				action: (editor) => this.toggleUnderline(editor),
-				settingKey: 'showUnderline'
-			},
-			{
-				id: 'strikethrough',
-				icon: 'strikethrough',
-				tooltip: 'Strikethrough',
-				action: (editor) => this.toggleStrikethrough(editor),
-				settingKey: 'showStrikethrough'
-			},
-			{
-				id: 'highlight',
-				icon: 'highlighter',
-				tooltip: 'Highlight',
-				action: (editor) => this.toggleHighlight(editor),
-				settingKey: 'showHighlight'
-			},
-			{
-				id: 'subscript',
-				icon: 'subscript',
-				tooltip: 'Subscript',
-				action: (editor) => this.toggleSubscript(editor),
-				settingKey: 'showSubscript'
-			},
-			{
-				id: 'superscript',
-				icon: 'superscript',
-				tooltip: 'Superscript',
-				action: (editor) => this.toggleSuperscript(editor),
-				settingKey: 'showSuperscript'
-			},
-			{
-				id: 'clear-formatting',
-				icon: 'eraser',
-				tooltip: 'Clear Formatting',
-				action: (editor) => this.clearFormatting(editor),
-				settingKey: 'showClearFormatting'
-			},
+			{ id: 'bold', icon: 'bold', tooltip: 'Bold', action: (e) => this.toggleBold(e), settingKey: 'showBold' },
+			{ id: 'italic', icon: 'italic', tooltip: 'Italic', action: (e) => this.toggleItalic(e), settingKey: 'showItalic' },
+			{ id: 'underline', icon: 'underline', tooltip: 'Underline', action: (e) => this.toggleUnderline(e), settingKey: 'showUnderline' },
+			{ id: 'strikethrough', icon: 'strikethrough', tooltip: 'Strikethrough', action: (e) => this.toggleStrikethrough(e), settingKey: 'showStrikethrough' },
+			{ id: 'highlight', icon: 'highlighter', tooltip: 'Highlight (Markdown)', action: (e) => this.toggleHighlight(e), settingKey: 'showHighlight' },
+			{ id: 'subscript', icon: 'subscript', tooltip: 'Subscript', action: (e) => this.toggleSubscript(e), settingKey: 'showSubscript' },
+			{ id: 'superscript', icon: 'superscript', tooltip: 'Superscript', action: (e) => this.toggleSuperscript(e), settingKey: 'showSuperscript' },
+			{ id: 'clear-formatting', icon: 'eraser', tooltip: 'Clear Formatting', action: (e) => this.clearFormatting(e), settingKey: 'showClearFormatting' },
 			{ id: 'separator-1', icon: '', tooltip: '', action: () => {} },
 
+			// Font Color (with dropdown)
+			{ id: 'font-color', icon: 'palette', tooltip: 'Font Color', action: () => {}, settingKey: 'showFontColor', hasDropdown: true },
+			// Background Color (with dropdown)
+			{ id: 'background-color', icon: 'paintbrush', tooltip: 'Background Color', action: () => {}, settingKey: 'showBackgroundColor', hasDropdown: true },
+			{ id: 'separator-1b', icon: '', tooltip: '', action: () => {} },
+
 			// Headings
-			{
-				id: 'heading-1',
-				icon: 'heading-1',
-				tooltip: 'Heading 1',
-				action: (editor) => this.insertHeading(editor, 1),
-				settingKey: 'showHeadings'
-			},
-			{
-				id: 'heading-2',
-				icon: 'heading-2',
-				tooltip: 'Heading 2',
-				action: (editor) => this.insertHeading(editor, 2),
-				settingKey: 'showHeadings'
-			},
-			{
-				id: 'heading-3',
-				icon: 'heading-3',
-				tooltip: 'Heading 3',
-				action: (editor) => this.insertHeading(editor, 3),
-				settingKey: 'showHeadings'
-			},
-			{
-				id: 'heading-4',
-				icon: 'heading-4',
-				tooltip: 'Heading 4',
-				action: (editor) => this.insertHeading(editor, 4),
-				settingKey: 'showHeadings'
-			},
-			{
-				id: 'heading-5',
-				icon: 'heading-5',
-				tooltip: 'Heading 5',
-				action: (editor) => this.insertHeading(editor, 5),
-				settingKey: 'showHeadings'
-			},
-			{
-				id: 'heading-6',
-				icon: 'heading-6',
-				tooltip: 'Heading 6',
-				action: (editor) => this.insertHeading(editor, 6),
-				settingKey: 'showHeadings'
-			},
+			{ id: 'heading-1', icon: 'heading-1', tooltip: 'Heading 1', action: (e) => this.insertHeading(e, 1), settingKey: 'showHeadings' },
+			{ id: 'heading-2', icon: 'heading-2', tooltip: 'Heading 2', action: (e) => this.insertHeading(e, 2), settingKey: 'showHeadings' },
+			{ id: 'heading-3', icon: 'heading-3', tooltip: 'Heading 3', action: (e) => this.insertHeading(e, 3), settingKey: 'showHeadings' },
+			{ id: 'heading-4', icon: 'heading-4', tooltip: 'Heading 4', action: (e) => this.insertHeading(e, 4), settingKey: 'showHeadings' },
+			{ id: 'heading-5', icon: 'heading-5', tooltip: 'Heading 5', action: (e) => this.insertHeading(e, 5), settingKey: 'showHeadings' },
+			{ id: 'heading-6', icon: 'heading-6', tooltip: 'Heading 6', action: (e) => this.insertHeading(e, 6), settingKey: 'showHeadings' },
 			{ id: 'separator-2', icon: '', tooltip: '', action: () => {} },
 
 			// Lists & Structure
-			{
-				id: 'bullet-list',
-				icon: 'list',
-				tooltip: 'Bullet List',
-				action: (editor) => this.toggleBulletList(editor),
-				settingKey: 'showLists'
-			},
-			{
-				id: 'numbered-list',
-				icon: 'list-ordered',
-				tooltip: 'Numbered List',
-				action: (editor) => this.toggleNumberedList(editor),
-				settingKey: 'showLists'
-			},
-			{
-				id: 'checklist',
-				icon: 'list-checks',
-				tooltip: 'Checklist / Task List',
-				action: (editor) => this.toggleChecklist(editor),
-				settingKey: 'showChecklist'
-			},
-			{
-				id: 'blockquote',
-				icon: 'quote',
-				tooltip: 'Blockquote',
-				action: (editor) => this.toggleBlockquote(editor),
-				settingKey: 'showBlockquote'
-			},
+			{ id: 'bullet-list', icon: 'list', tooltip: 'Bullet List', action: (e) => this.toggleBulletList(e), settingKey: 'showLists' },
+			{ id: 'numbered-list', icon: 'list-ordered', tooltip: 'Numbered List', action: (e) => this.toggleNumberedList(e), settingKey: 'showLists' },
+			{ id: 'checklist', icon: 'list-checks', tooltip: 'Checklist', action: (e) => this.toggleChecklist(e), settingKey: 'showChecklist' },
+			{ id: 'blockquote', icon: 'quote', tooltip: 'Blockquote', action: (e) => this.toggleBlockquote(e), settingKey: 'showBlockquote' },
 			{ id: 'separator-3', icon: '', tooltip: '', action: () => {} },
 
 			// Indentation
-			{
-				id: 'outdent',
-				icon: 'outdent',
-				tooltip: 'Decrease Indent',
-				action: (editor) => this.outdent(editor),
-				settingKey: 'showIndent'
-			},
-			{
-				id: 'indent',
-				icon: 'indent',
-				tooltip: 'Increase Indent',
-				action: (editor) => this.indent(editor),
-				settingKey: 'showIndent'
-			},
+			{ id: 'outdent', icon: 'outdent', tooltip: 'Decrease Indent', action: (e) => this.outdent(e), settingKey: 'showIndent' },
+			{ id: 'indent', icon: 'indent', tooltip: 'Increase Indent', action: (e) => this.indent(e), settingKey: 'showIndent' },
+			{ id: 'separator-3b', icon: '', tooltip: '', action: () => {} },
+
+			// Alignment (with dropdown)
+			{ id: 'alignment', icon: 'align-center', tooltip: 'Text Alignment', action: () => {}, settingKey: 'showAlignment', hasDropdown: true },
 			{ id: 'separator-4', icon: '', tooltip: '', action: () => {} },
 
 			// Insert Elements
-			{
-				id: 'horizontal-rule',
-				icon: 'minus',
-				tooltip: 'Horizontal Rule',
-				action: (editor) => this.insertHorizontalRule(editor),
-				settingKey: 'showHorizontalRule'
-			},
-			{
-				id: 'link',
-				icon: 'link',
-				tooltip: 'Insert Link',
-				action: (editor) => this.insertLink(editor),
-				settingKey: 'showLink'
-			},
-			{
-				id: 'image',
-				icon: 'image',
-				tooltip: 'Insert Image',
-				action: (editor) => this.insertImage(editor),
-				settingKey: 'showImage'
-			},
-			{
-				id: 'table',
-				icon: 'table',
-				tooltip: 'Insert Table',
-				action: (editor) => this.insertTable(editor),
-				settingKey: 'showTable'
-			},
-			{
-				id: 'inline-code',
-				icon: 'code',
-				tooltip: 'Inline Code',
-				action: (editor) => this.toggleInlineCode(editor),
-				settingKey: 'showCode'
-			},
-			{
-				id: 'code-block',
-				icon: 'file-code',
-				tooltip: 'Code Block',
-				action: (editor) => this.insertCodeBlock(editor),
-				settingKey: 'showCode'
-			},
+			{ id: 'horizontal-rule', icon: 'minus', tooltip: 'Horizontal Rule', action: (e) => this.insertHorizontalRule(e), settingKey: 'showHorizontalRule' },
+			{ id: 'link', icon: 'link', tooltip: 'Insert Link', action: (e) => this.insertLink(e), settingKey: 'showLink' },
+			{ id: 'image', icon: 'image', tooltip: 'Insert Image', action: (e) => this.insertImage(e), settingKey: 'showImage' },
+			{ id: 'table', icon: 'table', tooltip: 'Insert Table', action: (e) => this.insertTable(e), settingKey: 'showTable' },
+			{ id: 'inline-code', icon: 'code', tooltip: 'Inline Code', action: (e) => this.toggleInlineCode(e), settingKey: 'showCode' },
+			{ id: 'code-block', icon: 'file-code', tooltip: 'Code Block', action: (e) => this.insertCodeBlock(e), settingKey: 'showCode' },
 			{ id: 'separator-5', icon: '', tooltip: '', action: () => {} },
 
 			// Callouts
-			{
-				id: 'callout',
-				icon: 'message-square',
-				tooltip: 'Insert Callout',
-				action: (editor) => this.insertCallout(editor),
-				settingKey: 'showCallout'
-			},
-			{
-				id: 'scripture',
-				icon: 'book-open',
-				tooltip: 'Insert Scripture Block',
-				action: (editor) => this.insertScriptureBlock(editor),
-				settingKey: 'showScripture'
-			}
+			{ id: 'callout', icon: 'message-square', tooltip: 'Insert Callout', action: (e) => this.insertCallout(e), settingKey: 'showCallout' },
+			{ id: 'scripture', icon: 'book-open', tooltip: 'Insert Scripture', action: (e) => this.insertScriptureBlock(e), settingKey: 'showScripture' }
 		];
 
-		// Create buttons
 		for (const btn of buttons) {
 			if (btn.id.startsWith('separator')) {
 				const separator = document.createElement('div');
@@ -571,29 +313,27 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 				continue;
 			}
 
-			// Check if button should be shown based on settings
-			if (btn.settingKey && !this.settings[btn.settingKey]) {
-				continue;
+			if (btn.settingKey && !this.settings[btn.settingKey]) continue;
+
+			if (btn.hasDropdown) {
+				this.createDropdownButton(btn, activeView);
+			} else {
+				const buttonEl = document.createElement('button');
+				buttonEl.className = 'arcadia-toolbar-button';
+				buttonEl.setAttribute('aria-label', btn.tooltip);
+				buttonEl.setAttribute('title', btn.tooltip);
+				setIcon(buttonEl, btn.icon);
+
+				buttonEl.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (activeView.editor) btn.action(activeView.editor);
+				});
+
+				this.toolbarEl.appendChild(buttonEl);
 			}
-
-			const buttonEl = document.createElement('button');
-			buttonEl.className = 'arcadia-toolbar-button';
-			buttonEl.setAttribute('aria-label', btn.tooltip);
-			buttonEl.setAttribute('title', btn.tooltip);
-			setIcon(buttonEl, btn.icon);
-
-			buttonEl.addEventListener('click', (e) => {
-				e.preventDefault();
-				const editor = activeView.editor;
-				if (editor) {
-					btn.action(editor);
-				}
-			});
-
-			this.toolbarEl.appendChild(buttonEl);
 		}
 
-		// Insert toolbar into DOM
 		const cmScroller = editorEl.querySelector('.cm-scroller');
 		if (cmScroller && this.settings.toolbarPosition === 'top') {
 			editorEl.insertBefore(this.toolbarEl, cmScroller);
@@ -602,15 +342,201 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		}
 	}
 
+	createDropdownButton(btn: ToolbarButton, activeView: MarkdownView) {
+		const wrapper = document.createElement('div');
+		wrapper.className = 'arcadia-toolbar-dropdown';
+
+		const buttonEl = document.createElement('button');
+		buttonEl.className = 'arcadia-toolbar-button arcadia-toolbar-dropdown-trigger';
+		buttonEl.setAttribute('aria-label', btn.tooltip);
+		buttonEl.setAttribute('title', btn.tooltip);
+
+		if (btn.id === 'font-color') {
+			// Font color button with color indicator
+			const iconWrapper = document.createElement('span');
+			iconWrapper.className = 'arcadia-color-icon';
+			setIcon(iconWrapper, 'baseline');
+			const colorBar = document.createElement('span');
+			colorBar.className = 'arcadia-color-bar';
+			colorBar.style.backgroundColor = this.settings.lastFontColor;
+			buttonEl.appendChild(iconWrapper);
+			buttonEl.appendChild(colorBar);
+		} else if (btn.id === 'background-color') {
+			// Background color button with color indicator
+			const iconWrapper = document.createElement('span');
+			iconWrapper.className = 'arcadia-color-icon';
+			setIcon(iconWrapper, 'highlighter');
+			const colorBar = document.createElement('span');
+			colorBar.className = 'arcadia-color-bar';
+			colorBar.style.backgroundColor = this.settings.lastBackgroundColor;
+			buttonEl.appendChild(iconWrapper);
+			buttonEl.appendChild(colorBar);
+		} else if (btn.id === 'alignment') {
+			setIcon(buttonEl, 'align-center');
+		}
+
+		// Add dropdown arrow
+		const arrow = document.createElement('span');
+		arrow.className = 'arcadia-dropdown-arrow';
+		arrow.innerHTML = '▼';
+		buttonEl.appendChild(arrow);
+
+		buttonEl.addEventListener('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.toggleDropdown(btn.id, wrapper, activeView);
+		});
+
+		wrapper.appendChild(buttonEl);
+		this.toolbarEl!.appendChild(wrapper);
+	}
+
+	toggleDropdown(type: string, wrapper: HTMLElement, activeView: MarkdownView) {
+		this.closeDropdowns();
+
+		const dropdown = document.createElement('div');
+		dropdown.className = 'arcadia-dropdown-menu';
+
+		if (type === 'font-color') {
+			dropdown.innerHTML = '<div class="arcadia-dropdown-title">Font Colors</div>';
+			const grid = document.createElement('div');
+			grid.className = 'arcadia-color-grid';
+
+			FONT_COLORS.forEach(color => {
+				const colorBtn = document.createElement('button');
+				colorBtn.className = 'arcadia-color-swatch';
+				colorBtn.style.backgroundColor = color;
+				colorBtn.setAttribute('title', color);
+				colorBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					this.applyFontColor(activeView.editor, color);
+					this.closeDropdowns();
+				});
+				grid.appendChild(colorBtn);
+			});
+
+			dropdown.appendChild(grid);
+		} else if (type === 'background-color') {
+			dropdown.innerHTML = '<div class="arcadia-dropdown-title">Background Colors</div>';
+			const grid = document.createElement('div');
+			grid.className = 'arcadia-color-grid';
+
+			BACKGROUND_COLORS.forEach(color => {
+				const colorBtn = document.createElement('button');
+				colorBtn.className = 'arcadia-color-swatch';
+				if (color === 'transparent') {
+					colorBtn.innerHTML = '✕';
+					colorBtn.style.backgroundColor = '#fff';
+					colorBtn.style.color = '#999';
+				} else {
+					colorBtn.style.backgroundColor = color;
+				}
+				colorBtn.setAttribute('title', color);
+				colorBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					this.applyBackgroundColor(activeView.editor, color);
+					this.closeDropdowns();
+				});
+				grid.appendChild(colorBtn);
+			});
+
+			dropdown.appendChild(grid);
+		} else if (type === 'alignment') {
+			const alignments = [
+				{ align: 'left', icon: 'align-left', label: 'Align Left' },
+				{ align: 'center', icon: 'align-center', label: 'Align Center' },
+				{ align: 'right', icon: 'align-right', label: 'Align Right' },
+				{ align: 'justify', icon: 'align-justify', label: 'Justify' }
+			];
+
+			const grid = document.createElement('div');
+			grid.className = 'arcadia-align-grid';
+
+			alignments.forEach(({ align, icon, label }) => {
+				const alignBtn = document.createElement('button');
+				alignBtn.className = 'arcadia-align-button';
+				alignBtn.setAttribute('title', label);
+				setIcon(alignBtn, icon);
+				alignBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					this.setAlignment(activeView.editor, align);
+					this.closeDropdowns();
+				});
+				grid.appendChild(alignBtn);
+			});
+
+			dropdown.appendChild(grid);
+		}
+
+		wrapper.appendChild(dropdown);
+		this.activeDropdown = dropdown;
+	}
+
+	// === Color Functions ===
+
+	applyFontColor(editor: Editor, color: string) {
+		const selection = editor.getSelection();
+		this.settings.lastFontColor = color;
+		this.saveSettings();
+
+		if (selection) {
+			editor.replaceSelection(`<font color="${color}">${selection}</font>`);
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange(`<font color="${color}"></font>`, cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 22 });
+		}
+	}
+
+	applyBackgroundColor(editor: Editor, color: string) {
+		const selection = editor.getSelection();
+		this.settings.lastBackgroundColor = color;
+		this.saveSettings();
+
+		if (color === 'transparent') {
+			// Remove background color
+			if (selection) {
+				const cleaned = selection.replace(/<mark[^>]*>([^<]*)<\/mark>/g, '$1');
+				editor.replaceSelection(cleaned);
+			}
+		} else if (selection) {
+			editor.replaceSelection(`<mark style="background:${color}">${selection}</mark>`);
+		} else {
+			const cursor = editor.getCursor();
+			editor.replaceRange(`<mark style="background:${color}"></mark>`, cursor);
+			editor.setCursor({ line: cursor.line, ch: cursor.ch + 30 + color.length });
+		}
+	}
+
+	// === Alignment Function ===
+
+	setAlignment(editor: Editor, alignment: string) {
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+
+		// Check if line already has alignment
+		const alignMatch = line.match(/^<p align="[^"]*">(.*)<\/p>$/);
+		if (alignMatch) {
+			// Replace existing alignment
+			editor.setLine(cursor.line, `<p align="${alignment}">${alignMatch[1]}</p>`);
+		} else {
+			// Wrap line in alignment tag
+			editor.setLine(cursor.line, `<p align="${alignment}">${line}</p>`);
+		}
+	}
+
 	// === Undo/Redo ===
 
 	undo(editor: Editor) {
-		// @ts-ignore - undo exists on Editor
+		// @ts-ignore
 		editor.undo();
 	}
 
 	redo(editor: Editor) {
-		// @ts-ignore - redo exists on Editor
+		// @ts-ignore
 		editor.redo();
 	}
 
@@ -724,17 +650,18 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 	clearFormatting(editor: Editor) {
 		const selection = editor.getSelection();
 		if (selection) {
-			// Remove common markdown formatting
 			let cleaned = selection
-				.replace(/\*\*(.+?)\*\*/g, '$1')  // bold
-				.replace(/\*(.+?)\*/g, '$1')       // italic
-				.replace(/~~(.+?)~~/g, '$1')       // strikethrough
-				.replace(/==(.+?)==/g, '$1')       // highlight
-				.replace(/`(.+?)`/g, '$1')         // inline code
-				.replace(/<u>(.+?)<\/u>/g, '$1')   // underline
-				.replace(/<sub>(.+?)<\/sub>/g, '$1') // subscript
-				.replace(/<sup>(.+?)<\/sup>/g, '$1') // superscript
-				.replace(/<mark>(.+?)<\/mark>/g, '$1'); // mark
+				.replace(/\*\*(.+?)\*\*/g, '$1')
+				.replace(/\*(.+?)\*/g, '$1')
+				.replace(/~~(.+?)~~/g, '$1')
+				.replace(/==(.+?)==/g, '$1')
+				.replace(/`(.+?)`/g, '$1')
+				.replace(/<u>(.+?)<\/u>/g, '$1')
+				.replace(/<sub>(.+?)<\/sub>/g, '$1')
+				.replace(/<sup>(.+?)<\/sup>/g, '$1')
+				.replace(/<mark[^>]*>(.+?)<\/mark>/g, '$1')
+				.replace(/<font[^>]*>(.+?)<\/font>/g, '$1')
+				.replace(/<p align="[^"]*">(.+?)<\/p>/g, '$1');
 			editor.replaceSelection(cleaned);
 		}
 	}
@@ -794,19 +721,14 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		const line = editor.getLine(cursor.line);
 
 		if (line.match(/^(\s*)- \[ \] /)) {
-			// Unchecked -> checked
 			editor.setLine(cursor.line, line.replace(/^(\s*)- \[ \] /, '$1- [x] '));
 		} else if (line.match(/^(\s*)- \[x\] /i)) {
-			// Checked -> remove checkbox
 			editor.setLine(cursor.line, line.replace(/^(\s*)- \[x\] /i, '$1'));
 		} else if (line.match(/^(\s*)- /)) {
-			// Bullet -> checkbox
 			editor.setLine(cursor.line, line.replace(/^(\s*)- /, '$1- [ ] '));
 		} else if (line.match(/^(\s*)\d+\. /)) {
-			// Numbered -> checkbox
 			editor.setLine(cursor.line, line.replace(/^(\s*)\d+\. /, '$1- [ ] '));
 		} else {
-			// Plain text -> checkbox
 			const indent = line.match(/^(\s*)/)?.[0] || '';
 			editor.setLine(cursor.line, indent + '- [ ] ' + line.trimStart());
 		}
@@ -984,192 +906,37 @@ class ArcadiaToolbarSettingTab extends PluginSettingTab {
 		// Text Formatting
 		containerEl.createEl('h3', { text: 'Text Formatting' });
 
-		new Setting(containerEl)
-			.setName('Show Undo/Redo')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showUndo)
-				.onChange(async (value) => {
-					this.plugin.settings.showUndo = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Bold')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showBold)
-				.onChange(async (value) => {
-					this.plugin.settings.showBold = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Italic')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showItalic)
-				.onChange(async (value) => {
-					this.plugin.settings.showItalic = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Underline')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showUnderline)
-				.onChange(async (value) => {
-					this.plugin.settings.showUnderline = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Strikethrough')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showStrikethrough)
-				.onChange(async (value) => {
-					this.plugin.settings.showStrikethrough = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Highlight')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showHighlight)
-				.onChange(async (value) => {
-					this.plugin.settings.showHighlight = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Subscript/Superscript')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showSubscript)
-				.onChange(async (value) => {
-					this.plugin.settings.showSubscript = value;
-					this.plugin.settings.showSuperscript = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Clear Formatting')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showClearFormatting)
-				.onChange(async (value) => {
-					this.plugin.settings.showClearFormatting = value;
-					await this.plugin.saveSettings();
-				}));
+		new Setting(containerEl).setName('Show Undo/Redo').addToggle(toggle => toggle.setValue(this.plugin.settings.showUndo).onChange(async (value) => { this.plugin.settings.showUndo = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Bold').addToggle(toggle => toggle.setValue(this.plugin.settings.showBold).onChange(async (value) => { this.plugin.settings.showBold = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Italic').addToggle(toggle => toggle.setValue(this.plugin.settings.showItalic).onChange(async (value) => { this.plugin.settings.showItalic = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Underline').addToggle(toggle => toggle.setValue(this.plugin.settings.showUnderline).onChange(async (value) => { this.plugin.settings.showUnderline = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Strikethrough').addToggle(toggle => toggle.setValue(this.plugin.settings.showStrikethrough).onChange(async (value) => { this.plugin.settings.showStrikethrough = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Highlight').addToggle(toggle => toggle.setValue(this.plugin.settings.showHighlight).onChange(async (value) => { this.plugin.settings.showHighlight = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Subscript/Superscript').addToggle(toggle => toggle.setValue(this.plugin.settings.showSubscript).onChange(async (value) => { this.plugin.settings.showSubscript = value; this.plugin.settings.showSuperscript = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Clear Formatting').addToggle(toggle => toggle.setValue(this.plugin.settings.showClearFormatting).onChange(async (value) => { this.plugin.settings.showClearFormatting = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Font Color').setDesc('Color picker for text color using HTML').addToggle(toggle => toggle.setValue(this.plugin.settings.showFontColor).onChange(async (value) => { this.plugin.settings.showFontColor = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Background Color').setDesc('Color picker for background highlight using HTML').addToggle(toggle => toggle.setValue(this.plugin.settings.showBackgroundColor).onChange(async (value) => { this.plugin.settings.showBackgroundColor = value; await this.plugin.saveSettings(); }));
 
 		// Structure
 		containerEl.createEl('h3', { text: 'Structure' });
 
-		new Setting(containerEl)
-			.setName('Show Heading buttons')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showHeadings)
-				.onChange(async (value) => {
-					this.plugin.settings.showHeadings = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show List buttons')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showLists)
-				.onChange(async (value) => {
-					this.plugin.settings.showLists = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Checklist button')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showChecklist)
-				.onChange(async (value) => {
-					this.plugin.settings.showChecklist = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Blockquote')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showBlockquote)
-				.onChange(async (value) => {
-					this.plugin.settings.showBlockquote = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Indent/Outdent')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showIndent)
-				.onChange(async (value) => {
-					this.plugin.settings.showIndent = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Horizontal Rule')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showHorizontalRule)
-				.onChange(async (value) => {
-					this.plugin.settings.showHorizontalRule = value;
-					await this.plugin.saveSettings();
-				}));
+		new Setting(containerEl).setName('Show Heading buttons').addToggle(toggle => toggle.setValue(this.plugin.settings.showHeadings).onChange(async (value) => { this.plugin.settings.showHeadings = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show List buttons').addToggle(toggle => toggle.setValue(this.plugin.settings.showLists).onChange(async (value) => { this.plugin.settings.showLists = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Checklist button').addToggle(toggle => toggle.setValue(this.plugin.settings.showChecklist).onChange(async (value) => { this.plugin.settings.showChecklist = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Blockquote').addToggle(toggle => toggle.setValue(this.plugin.settings.showBlockquote).onChange(async (value) => { this.plugin.settings.showBlockquote = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Indent/Outdent').addToggle(toggle => toggle.setValue(this.plugin.settings.showIndent).onChange(async (value) => { this.plugin.settings.showIndent = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Alignment').setDesc('Text alignment using HTML').addToggle(toggle => toggle.setValue(this.plugin.settings.showAlignment).onChange(async (value) => { this.plugin.settings.showAlignment = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Horizontal Rule').addToggle(toggle => toggle.setValue(this.plugin.settings.showHorizontalRule).onChange(async (value) => { this.plugin.settings.showHorizontalRule = value; await this.plugin.saveSettings(); }));
 
 		// Insert Elements
 		containerEl.createEl('h3', { text: 'Insert Elements' });
 
-		new Setting(containerEl)
-			.setName('Show Link')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showLink)
-				.onChange(async (value) => {
-					this.plugin.settings.showLink = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Image')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showImage)
-				.onChange(async (value) => {
-					this.plugin.settings.showImage = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Table')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showTable)
-				.onChange(async (value) => {
-					this.plugin.settings.showTable = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Code buttons')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showCode)
-				.onChange(async (value) => {
-					this.plugin.settings.showCode = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Callout')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showCallout)
-				.onChange(async (value) => {
-					this.plugin.settings.showCallout = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Show Scripture')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showScripture)
-				.onChange(async (value) => {
-					this.plugin.settings.showScripture = value;
-					await this.plugin.saveSettings();
-				}));
+		new Setting(containerEl).setName('Show Link').addToggle(toggle => toggle.setValue(this.plugin.settings.showLink).onChange(async (value) => { this.plugin.settings.showLink = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Image').addToggle(toggle => toggle.setValue(this.plugin.settings.showImage).onChange(async (value) => { this.plugin.settings.showImage = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Table').addToggle(toggle => toggle.setValue(this.plugin.settings.showTable).onChange(async (value) => { this.plugin.settings.showTable = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Code buttons').addToggle(toggle => toggle.setValue(this.plugin.settings.showCode).onChange(async (value) => { this.plugin.settings.showCode = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Callout').addToggle(toggle => toggle.setValue(this.plugin.settings.showCallout).onChange(async (value) => { this.plugin.settings.showCallout = value; await this.plugin.saveSettings(); }));
+		new Setting(containerEl).setName('Show Scripture').addToggle(toggle => toggle.setValue(this.plugin.settings.showScripture).onChange(async (value) => { this.plugin.settings.showScripture = value; await this.plugin.saveSettings(); }));
 
 		// Scripture Settings
 		containerEl.createEl('h3', { text: 'Scripture Settings' });
