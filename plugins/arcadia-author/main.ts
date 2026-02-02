@@ -1,7 +1,6 @@
 import {
 	App,
 	Editor,
-	EditorPosition,
 	MarkdownView,
 	Modal,
 	Notice,
@@ -13,22 +12,6 @@ import {
 	setIcon,
 	debounce
 } from 'obsidian';
-
-import {
-	StateField,
-	StateEffect,
-	RangeSetBuilder,
-	EditorState
-} from '@codemirror/state';
-
-import {
-	Decoration,
-	DecorationSet,
-	EditorView,
-	WidgetType,
-	ViewPlugin,
-	ViewUpdate
-} from '@codemirror/view';
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -56,19 +39,6 @@ interface CommentReply {
 interface DocumentAnnotations {
 	version: string;
 	comments: Comment[];
-	trackChanges?: TrackChange[];
-}
-
-interface TrackChange {
-	id: string;
-	type: 'insert' | 'delete' | 'replace';
-	originalText: string;
-	newText: string;
-	author: string;
-	createdAt: string;
-	startOffset: number;
-	endOffset: number;
-	accepted: boolean | null;
 }
 
 interface WordCountStats {
@@ -81,55 +51,25 @@ interface WordCountStats {
 }
 
 interface ArcadiaAuthorSettings {
-	// Feature Flags
 	enableComments: boolean;
-	enableTrackChanges: boolean;
 	enableWordCount: boolean;
-	enableAutoNumbering: boolean;
-	enableTOC: boolean;
-
-	// Comments Settings
 	defaultAuthor: string;
 	showResolvedComments: boolean;
-	commentHighlightColor: string;
-
-	// Word Count Settings
 	showWordCount: boolean;
 	showCharacterCount: boolean;
 	showReadingTime: boolean;
 	wordsPerMinute: number;
-	wordCountPosition: 'statusbar' | 'toolbar';
-
-	// Track Changes Settings
-	trackChangesAuthor: string;
-	showInsertions: boolean;
-	showDeletions: boolean;
 }
 
 const DEFAULT_SETTINGS: ArcadiaAuthorSettings = {
-	// Feature Flags
 	enableComments: true,
-	enableTrackChanges: false,
 	enableWordCount: true,
-	enableAutoNumbering: false,
-	enableTOC: false,
-
-	// Comments Settings
 	defaultAuthor: 'Author',
 	showResolvedComments: false,
-	commentHighlightColor: '#fef08a',
-
-	// Word Count Settings
 	showWordCount: true,
 	showCharacterCount: true,
 	showReadingTime: true,
-	wordsPerMinute: 200,
-	wordCountPosition: 'statusbar',
-
-	// Track Changes Settings
-	trackChangesAuthor: 'Author',
-	showInsertions: true,
-	showDeletions: true
+	wordsPerMinute: 200
 };
 
 // ============================================================================
@@ -147,7 +87,7 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 		await this.loadSettings();
 
 		// Initialize status bar for word count
-		if (this.settings.enableWordCount && this.settings.wordCountPosition === 'statusbar') {
+		if (this.settings.enableWordCount) {
 			this.statusBarItem = this.addStatusBarItem();
 			this.statusBarItem.addClass('arcadia-word-count');
 		}
@@ -207,12 +147,10 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	// ============================================================================
 
 	private registerCommands() {
-		// Comment commands
 		if (this.settings.enableComments) {
 			this.addCommand({
 				id: 'add-comment',
 				name: 'Add Comment',
-				icon: 'message-square-plus',
 				editorCallback: (editor: Editor, view: MarkdownView) => {
 					this.addComment(editor, view);
 				}
@@ -221,7 +159,6 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 			this.addCommand({
 				id: 'toggle-comments-panel',
 				name: 'Toggle Comments Panel',
-				icon: 'message-square',
 				callback: () => {
 					this.toggleCommentsPanel();
 				}
@@ -230,30 +167,17 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 			this.addCommand({
 				id: 'resolve-all-comments',
 				name: 'Resolve All Comments',
-				icon: 'check-check',
 				callback: () => {
 					this.resolveAllComments();
 				}
 			});
 		}
 
-		// Word count command
 		this.addCommand({
 			id: 'show-document-statistics',
 			name: 'Show Document Statistics',
-			icon: 'bar-chart-2',
 			callback: () => {
 				this.showDocumentStatistics();
-			}
-		});
-
-		// Export commands (Phase 3 placeholder)
-		this.addCommand({
-			id: 'export-clean-markdown',
-			name: 'Export Clean Markdown (without annotations)',
-			icon: 'file-text',
-			callback: () => {
-				this.exportCleanMarkdown();
 			}
 		});
 	}
@@ -275,7 +199,7 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	}
 
 	// ============================================================================
-	// AUTHOR TOOLBAR (docked below Arcadia Toolbar)
+	// AUTHOR TOOLBAR
 	// ============================================================================
 
 	private removeAuthorToolbar() {
@@ -294,8 +218,9 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 		const editorEl = activeView.containerEl.querySelector('.cm-editor');
 		if (!editorEl) return;
 
-		// Create author toolbar
-		this.authorToolbarEl = createEl('div', { cls: 'arcadia-author-toolbar' });
+		// Create author toolbar using standard DOM
+		this.authorToolbarEl = document.createElement('div');
+		this.authorToolbarEl.className = 'arcadia-author-toolbar';
 
 		// Comments section
 		if (this.settings.enableComments) {
@@ -308,39 +233,18 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 				this.toggleCommentsPanel();
 			});
 			this.authorToolbarEl.appendChild(togglePanelBtn);
-		}
 
-		// Separator
-		if (this.settings.enableComments && this.settings.enableTrackChanges) {
-			this.authorToolbarEl.appendChild(createEl('div', { cls: 'arcadia-author-separator' }));
+			// Separator
+			const sep = document.createElement('div');
+			sep.className = 'arcadia-author-separator';
+			this.authorToolbarEl.appendChild(sep);
 		}
-
-		// Track Changes section (Phase 2)
-		if (this.settings.enableTrackChanges) {
-			const trackBtn = this.createToolbarButton('git-compare', 'Track Changes', () => {
-				new Notice('Track Changes feature coming in Phase 2');
-			});
-			trackBtn.addClass('is-disabled');
-			this.authorToolbarEl.appendChild(trackBtn);
-		}
-
-		// Separator
-		this.authorToolbarEl.appendChild(createEl('div', { cls: 'arcadia-author-separator' }));
 
 		// Statistics button
 		const statsBtn = this.createToolbarButton('bar-chart-2', 'Document Statistics', () => {
 			this.showDocumentStatistics();
 		});
 		this.authorToolbarEl.appendChild(statsBtn);
-
-		// TOC button (Phase 2)
-		if (this.settings.enableTOC) {
-			const tocBtn = this.createToolbarButton('list-tree', 'Table of Contents', () => {
-				new Notice('Table of Contents feature coming in Phase 2');
-			});
-			tocBtn.addClass('is-disabled');
-			this.authorToolbarEl.appendChild(tocBtn);
-		}
 
 		// Insert toolbar after arcadia-toolbar or at top of editor
 		const arcadiaToolbar = editorEl.querySelector('.arcadia-toolbar');
@@ -354,10 +258,10 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	}
 
 	private createToolbarButton(icon: string, tooltip: string, onClick: () => void): HTMLElement {
-		const btn = createEl('button', {
-			cls: 'arcadia-author-button',
-			attr: { 'aria-label': tooltip, title: tooltip }
-		});
+		const btn = document.createElement('button');
+		btn.className = 'arcadia-author-button';
+		btn.setAttribute('aria-label', tooltip);
+		btn.setAttribute('title', tooltip);
 		setIcon(btn, icon);
 		btn.addEventListener('click', (e) => {
 			e.preventDefault();
@@ -389,19 +293,16 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 				const annotations: DocumentAnnotations = JSON.parse(content);
 				this.currentAnnotations.set(file.path, annotations);
 			} else {
-				// No annotations file exists yet
 				this.currentAnnotations.set(file.path, {
 					version: '1.0.0',
-					comments: [],
-					trackChanges: []
+					comments: []
 				});
 			}
 		} catch (error) {
 			console.error('Error loading annotations:', error);
 			this.currentAnnotations.set(file.path, {
 				version: '1.0.0',
-				comments: [],
-				trackChanges: []
+				comments: []
 			});
 		}
 	}
@@ -448,7 +349,6 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 			const from = editor.getCursor('from');
 			const to = editor.getCursor('to');
 
-			// Calculate offsets
 			const startOffset = editor.posToOffset(from);
 			const endOffset = editor.posToOffset(to);
 
@@ -464,7 +364,6 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 				replies: []
 			};
 
-			// Add to annotations
 			const annotations = this.currentAnnotations.get(file.path);
 			if (annotations) {
 				annotations.comments.push(comment);
@@ -476,8 +375,8 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	}
 
 	private toggleCommentsPanel() {
-		if (this.commentsPanelEl && this.commentsPanelEl.isShown()) {
-			this.commentsPanelEl.hide();
+		if (this.commentsPanelEl && this.commentsPanelEl.style.display !== 'none') {
+			this.commentsPanelEl.style.display = 'none';
 		} else {
 			this.showCommentsPanel();
 		}
@@ -491,12 +390,13 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 		}
 
 		if (!this.commentsPanelEl) {
-			this.commentsPanelEl = createEl('div', { cls: 'arcadia-comments-panel' });
+			this.commentsPanelEl = document.createElement('div');
+			this.commentsPanelEl.className = 'arcadia-comments-panel';
 			document.body.appendChild(this.commentsPanelEl);
 		}
 
 		this.updateCommentsPanel();
-		this.commentsPanelEl.show();
+		this.commentsPanelEl.style.display = 'flex';
 	}
 
 	private updateCommentsPanel() {
@@ -508,71 +408,97 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 		const annotations = this.currentAnnotations.get(activeView.file.path);
 		if (!annotations) return;
 
-		this.commentsPanelEl.empty();
+		this.commentsPanelEl.innerHTML = '';
 
 		// Header
-		const header = this.commentsPanelEl.createEl('div', { cls: 'arcadia-comments-header' });
-		header.createEl('h3', { text: 'Comments' });
+		const header = document.createElement('div');
+		header.className = 'arcadia-comments-header';
 
-		const closeBtn = header.createEl('button', { cls: 'arcadia-comments-close' });
+		const title = document.createElement('h3');
+		title.textContent = 'Comments';
+		header.appendChild(title);
+
+		const closeBtn = document.createElement('button');
+		closeBtn.className = 'arcadia-comments-close';
 		setIcon(closeBtn, 'x');
-		closeBtn.addEventListener('click', () => this.commentsPanelEl?.hide());
+		closeBtn.addEventListener('click', () => {
+			if (this.commentsPanelEl) {
+				this.commentsPanelEl.style.display = 'none';
+			}
+		});
+		header.appendChild(closeBtn);
+		this.commentsPanelEl.appendChild(header);
 
 		// Comments list
-		const list = this.commentsPanelEl.createEl('div', { cls: 'arcadia-comments-list' });
+		const list = document.createElement('div');
+		list.className = 'arcadia-comments-list';
 
 		const visibleComments = annotations.comments.filter(c =>
 			this.settings.showResolvedComments || !c.resolved
 		);
 
 		if (visibleComments.length === 0) {
-			list.createEl('p', {
-				text: 'No comments yet. Select text and click "Add Comment" to create one.',
-				cls: 'arcadia-comments-empty'
-			});
+			const empty = document.createElement('p');
+			empty.className = 'arcadia-comments-empty';
+			empty.textContent = 'No comments yet. Select text and click "Add Comment" to create one.';
+			list.appendChild(empty);
 		} else {
 			visibleComments.forEach(comment => {
 				const commentEl = this.createCommentElement(comment, activeView.file!);
 				list.appendChild(commentEl);
 			});
 		}
+
+		this.commentsPanelEl.appendChild(list);
 	}
 
 	private createCommentElement(comment: Comment, file: TFile): HTMLElement {
-		const el = createEl('div', { cls: 'arcadia-comment' });
+		const el = document.createElement('div');
+		el.className = 'arcadia-comment';
 		if (comment.resolved) {
-			el.addClass('is-resolved');
+			el.classList.add('is-resolved');
 		}
 
 		// Comment header
-		const headerEl = el.createEl('div', { cls: 'arcadia-comment-header' });
-		headerEl.createEl('span', { text: comment.author, cls: 'arcadia-comment-author' });
-		headerEl.createEl('span', {
-			text: new Date(comment.createdAt).toLocaleDateString(),
-			cls: 'arcadia-comment-date'
-		});
+		const headerEl = document.createElement('div');
+		headerEl.className = 'arcadia-comment-header';
+
+		const authorEl = document.createElement('span');
+		authorEl.className = 'arcadia-comment-author';
+		authorEl.textContent = comment.author;
+		headerEl.appendChild(authorEl);
+
+		const dateEl = document.createElement('span');
+		dateEl.className = 'arcadia-comment-date';
+		dateEl.textContent = new Date(comment.createdAt).toLocaleDateString();
+		headerEl.appendChild(dateEl);
+
+		el.appendChild(headerEl);
 
 		// Comment text
-		el.createEl('p', { text: comment.text, cls: 'arcadia-comment-text' });
+		const textEl = document.createElement('p');
+		textEl.className = 'arcadia-comment-text';
+		textEl.textContent = comment.text;
+		el.appendChild(textEl);
 
 		// Actions
-		const actionsEl = el.createEl('div', { cls: 'arcadia-comment-actions' });
+		const actionsEl = document.createElement('div');
+		actionsEl.className = 'arcadia-comment-actions';
 
-		const resolveBtn = actionsEl.createEl('button', {
-			text: comment.resolved ? 'Unresolve' : 'Resolve',
-			cls: 'arcadia-comment-action'
-		});
+		const resolveBtn = document.createElement('button');
+		resolveBtn.className = 'arcadia-comment-action';
+		resolveBtn.textContent = comment.resolved ? 'Unresolve' : 'Resolve';
 		resolveBtn.addEventListener('click', async () => {
 			comment.resolved = !comment.resolved;
 			comment.updatedAt = new Date().toISOString();
 			await this.saveAnnotationsForFile(file);
 			this.updateCommentsPanel();
 		});
+		actionsEl.appendChild(resolveBtn);
 
-		const deleteBtn = actionsEl.createEl('button', {
-			text: 'Delete',
-			cls: 'arcadia-comment-action arcadia-comment-delete'
-		});
+		const deleteBtn = document.createElement('button');
+		deleteBtn.className = 'arcadia-comment-action arcadia-comment-delete';
+		deleteBtn.textContent = 'Delete';
 		deleteBtn.addEventListener('click', async () => {
 			const annotations = this.currentAnnotations.get(file.path);
 			if (annotations) {
@@ -582,36 +508,9 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 				new Notice('Comment deleted');
 			}
 		});
+		actionsEl.appendChild(deleteBtn);
 
-		// Replies
-		if (comment.replies.length > 0) {
-			const repliesEl = el.createEl('div', { cls: 'arcadia-comment-replies' });
-			comment.replies.forEach(reply => {
-				const replyEl = repliesEl.createEl('div', { cls: 'arcadia-comment-reply' });
-				replyEl.createEl('span', { text: reply.author, cls: 'arcadia-comment-author' });
-				replyEl.createEl('p', { text: reply.text });
-			});
-		}
-
-		// Reply button
-		const replyBtn = actionsEl.createEl('button', {
-			text: 'Reply',
-			cls: 'arcadia-comment-action'
-		});
-		replyBtn.addEventListener('click', () => {
-			new AddReplyModal(this.app, this.settings.defaultAuthor, async (replyText, author) => {
-				const reply: CommentReply = {
-					id: this.generateId(),
-					text: replyText,
-					author: author,
-					createdAt: new Date().toISOString()
-				};
-				comment.replies.push(reply);
-				comment.updatedAt = new Date().toISOString();
-				await this.saveAnnotationsForFile(file);
-				this.updateCommentsPanel();
-			}).open();
-		});
+		el.appendChild(actionsEl);
 
 		return el;
 	}
@@ -644,17 +543,15 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	// ============================================================================
 
 	private calculateWordCount(text: string): WordCountStats {
-		// Remove frontmatter
 		const contentWithoutFrontmatter = text.replace(/^---[\s\S]*?---\n?/, '');
 
-		// Remove markdown syntax for accurate counting
 		const cleanText = contentWithoutFrontmatter
-			.replace(/```[\s\S]*?```/g, '') // Remove code blocks
-			.replace(/`[^`]+`/g, '') // Remove inline code
-			.replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
-			.replace(/\[([^\]]+)\]\(.*?\)/g, '$1') // Keep link text
-			.replace(/[#*_~`>]/g, '') // Remove markdown symbols
-			.replace(/\n/g, ' ') // Replace newlines with spaces
+			.replace(/```[\s\S]*?```/g, '')
+			.replace(/`[^`]+`/g, '')
+			.replace(/!\[.*?\]\(.*?\)/g, '')
+			.replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+			.replace(/[#*_~`>]/g, '')
+			.replace(/\n/g, ' ')
 			.trim();
 
 		const words = cleanText.split(/\s+/).filter(word => word.length > 0);
@@ -708,24 +605,6 @@ export default class ArcadiaAuthorPlugin extends Plugin {
 	}
 
 	// ============================================================================
-	// EXPORT FUNCTIONS
-	// ============================================================================
-
-	private async exportCleanMarkdown() {
-		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (!activeView?.file) {
-			new Notice('No active document');
-			return;
-		}
-
-		const content = activeView.editor.getValue();
-
-		// For now, just copy to clipboard (Phase 3 will add file export)
-		await navigator.clipboard.writeText(content);
-		new Notice('Clean markdown copied to clipboard');
-	}
-
-	// ============================================================================
 	// UTILITIES
 	// ============================================================================
 
@@ -742,6 +621,8 @@ class AddCommentModal extends Modal {
 	private selection: string;
 	private defaultAuthor: string;
 	private onSubmit: (text: string, author: string) => void;
+	private authorInput: HTMLInputElement;
+	private commentInput: HTMLTextAreaElement;
 
 	constructor(app: App, selection: string, defaultAuthor: string, onSubmit: (text: string, author: string) => void) {
 		super(app);
@@ -754,107 +635,40 @@ class AddCommentModal extends Modal {
 		const { contentEl } = this;
 		contentEl.addClass('arcadia-modal');
 
-		contentEl.createEl('h2', { text: 'Add Comment' });
+		const title = contentEl.createEl('h2', { text: 'Add Comment' });
 
 		// Show selected text
-		const selectionEl = contentEl.createEl('div', { cls: 'arcadia-modal-selection' });
-		selectionEl.createEl('label', { text: 'Selected text:' });
-		selectionEl.createEl('blockquote', { text: this.selection });
+		const selectionDiv = contentEl.createEl('div', { cls: 'arcadia-modal-selection' });
+		selectionDiv.createEl('label', { text: 'Selected text:' });
+		selectionDiv.createEl('blockquote', { text: this.selection });
 
 		// Author input
-		const authorSetting = new Setting(contentEl)
-			.setName('Author')
-			.addText(text => text
-				.setValue(this.defaultAuthor)
-				.setPlaceholder('Your name'));
+		const authorDiv = contentEl.createEl('div', { cls: 'setting-item' });
+		authorDiv.createEl('label', { text: 'Author' });
+		this.authorInput = authorDiv.createEl('input', { type: 'text', value: this.defaultAuthor });
 
 		// Comment input
-		let commentText = '';
-		const commentSetting = new Setting(contentEl)
-			.setName('Comment')
-			.addTextArea(textarea => {
-				textarea.setPlaceholder('Enter your comment...');
-				textarea.inputEl.rows = 4;
-				textarea.onChange(value => commentText = value);
-			});
+		const commentDiv = contentEl.createEl('div', { cls: 'setting-item' });
+		commentDiv.createEl('label', { text: 'Comment' });
+		this.commentInput = commentDiv.createEl('textarea', { placeholder: 'Enter your comment...' });
+		this.commentInput.rows = 4;
 
 		// Buttons
-		new Setting(contentEl)
-			.addButton(btn => btn
-				.setButtonText('Cancel')
-				.onClick(() => this.close()))
-			.addButton(btn => btn
-				.setButtonText('Add Comment')
-				.setCta()
-				.onClick(() => {
-					if (commentText.trim()) {
-						const authorInput = authorSetting.controlEl.querySelector('input');
-						const author = authorInput?.value || this.defaultAuthor;
-						this.onSubmit(commentText.trim(), author);
-						this.close();
-					} else {
-						new Notice('Please enter a comment');
-					}
-				}));
-	}
+		const buttonDiv = contentEl.createEl('div', { cls: 'arcadia-modal-buttons' });
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
-}
+		const cancelBtn = buttonDiv.createEl('button', { text: 'Cancel' });
+		cancelBtn.addEventListener('click', () => this.close());
 
-class AddReplyModal extends Modal {
-	private defaultAuthor: string;
-	private onSubmit: (text: string, author: string) => void;
-
-	constructor(app: App, defaultAuthor: string, onSubmit: (text: string, author: string) => void) {
-		super(app);
-		this.defaultAuthor = defaultAuthor;
-		this.onSubmit = onSubmit;
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.addClass('arcadia-modal');
-
-		contentEl.createEl('h2', { text: 'Add Reply' });
-
-		// Author input
-		const authorSetting = new Setting(contentEl)
-			.setName('Author')
-			.addText(text => text
-				.setValue(this.defaultAuthor)
-				.setPlaceholder('Your name'));
-
-		// Reply input
-		let replyText = '';
-		new Setting(contentEl)
-			.setName('Reply')
-			.addTextArea(textarea => {
-				textarea.setPlaceholder('Enter your reply...');
-				textarea.inputEl.rows = 3;
-				textarea.onChange(value => replyText = value);
-			});
-
-		// Buttons
-		new Setting(contentEl)
-			.addButton(btn => btn
-				.setButtonText('Cancel')
-				.onClick(() => this.close()))
-			.addButton(btn => btn
-				.setButtonText('Add Reply')
-				.setCta()
-				.onClick(() => {
-					if (replyText.trim()) {
-						const authorInput = authorSetting.controlEl.querySelector('input');
-						const author = authorInput?.value || this.defaultAuthor;
-						this.onSubmit(replyText.trim(), author);
-						this.close();
-					} else {
-						new Notice('Please enter a reply');
-					}
-				}));
+		const submitBtn = buttonDiv.createEl('button', { text: 'Add Comment', cls: 'mod-cta' });
+		submitBtn.addEventListener('click', () => {
+			const text = this.commentInput.value.trim();
+			if (text) {
+				this.onSubmit(text, this.authorInput.value || this.defaultAuthor);
+				this.close();
+			} else {
+				new Notice('Please enter a comment');
+			}
+		});
 	}
 
 	onClose() {
@@ -886,11 +700,9 @@ class DocumentStatisticsModal extends Modal {
 		this.createStatItem(statsGrid, 'Paragraphs', this.stats.paragraphs.toLocaleString());
 		this.createStatItem(statsGrid, 'Reading Time', `${this.stats.readingTime} min`);
 
-		new Setting(contentEl)
-			.addButton(btn => btn
-				.setButtonText('Close')
-				.setCta()
-				.onClick(() => this.close()));
+		const buttonDiv = contentEl.createEl('div', { cls: 'arcadia-modal-buttons' });
+		const closeBtn = buttonDiv.createEl('button', { text: 'Close', cls: 'mod-cta' });
+		closeBtn.addEventListener('click', () => this.close());
 	}
 
 	private createStatItem(container: HTMLElement, label: string, value: string) {
@@ -923,7 +735,6 @@ class ArcadiaAuthorSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', { text: 'Arcadia Author Settings' });
 
-		// Feature Flags Section
 		containerEl.createEl('h3', { text: 'Features' });
 
 		new Setting(containerEl)
@@ -937,17 +748,6 @@ class ArcadiaAuthorSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Enable Track Changes')
-			.setDesc('Track insertions and deletions (Phase 2 feature)')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.enableTrackChanges)
-				.setDisabled(true)
-				.onChange(async (value) => {
-					this.plugin.settings.enableTrackChanges = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
 			.setName('Enable Word Count')
 			.setDesc('Show word count and reading statistics')
 			.addToggle(toggle => toggle
@@ -957,29 +757,6 @@ class ArcadiaAuthorSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
-			.setName('Enable Auto-Numbering')
-			.setDesc('Automatically number headings (Phase 2 feature)')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.enableAutoNumbering)
-				.setDisabled(true)
-				.onChange(async (value) => {
-					this.plugin.settings.enableAutoNumbering = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Enable Table of Contents')
-			.setDesc('Generate table of contents (Phase 2 feature)')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.enableTOC)
-				.setDisabled(true)
-				.onChange(async (value) => {
-					this.plugin.settings.enableTOC = value;
-					await this.plugin.saveSettings();
-				}));
-
-		// Comments Section
 		containerEl.createEl('h3', { text: 'Comments' });
 
 		new Setting(containerEl)
@@ -1003,7 +780,6 @@ class ArcadiaAuthorSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// Word Count Section
 		containerEl.createEl('h3', { text: 'Word Count' });
 
 		new Setting(containerEl)
@@ -1042,18 +818,6 @@ class ArcadiaAuthorSettingTab extends PluginSettingTab {
 				.setDynamicTooltip()
 				.onChange(async (value) => {
 					this.plugin.settings.wordsPerMinute = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Word Count Position')
-			.setDesc('Where to display the word count')
-			.addDropdown(dropdown => dropdown
-				.addOption('statusbar', 'Status Bar')
-				.addOption('toolbar', 'Author Toolbar')
-				.setValue(this.plugin.settings.wordCountPosition)
-				.onChange(async (value) => {
-					this.plugin.settings.wordCountPosition = value as 'statusbar' | 'toolbar';
 					await this.plugin.saveSettings();
 				}));
 	}

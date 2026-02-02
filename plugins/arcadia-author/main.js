@@ -29,26 +29,14 @@ __export(main_exports, {
 module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 var DEFAULT_SETTINGS = {
-  // Feature Flags
   enableComments: true,
-  enableTrackChanges: false,
   enableWordCount: true,
-  enableAutoNumbering: false,
-  enableTOC: false,
-  // Comments Settings
   defaultAuthor: "Author",
   showResolvedComments: false,
-  commentHighlightColor: "#fef08a",
-  // Word Count Settings
   showWordCount: true,
   showCharacterCount: true,
   showReadingTime: true,
-  wordsPerMinute: 200,
-  wordCountPosition: "statusbar",
-  // Track Changes Settings
-  trackChangesAuthor: "Author",
-  showInsertions: true,
-  showDeletions: true
+  wordsPerMinute: 200
 };
 var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
   constructor() {
@@ -60,7 +48,7 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
   }
   async onload() {
     await this.loadSettings();
-    if (this.settings.enableWordCount && this.settings.wordCountPosition === "statusbar") {
+    if (this.settings.enableWordCount) {
       this.statusBarItem = this.addStatusBarItem();
       this.statusBarItem.addClass("arcadia-word-count");
     }
@@ -109,7 +97,6 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
       this.addCommand({
         id: "add-comment",
         name: "Add Comment",
-        icon: "message-square-plus",
         editorCallback: (editor, view) => {
           this.addComment(editor, view);
         }
@@ -117,7 +104,6 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
       this.addCommand({
         id: "toggle-comments-panel",
         name: "Toggle Comments Panel",
-        icon: "message-square",
         callback: () => {
           this.toggleCommentsPanel();
         }
@@ -125,7 +111,6 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
       this.addCommand({
         id: "resolve-all-comments",
         name: "Resolve All Comments",
-        icon: "check-check",
         callback: () => {
           this.resolveAllComments();
         }
@@ -134,17 +119,8 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     this.addCommand({
       id: "show-document-statistics",
       name: "Show Document Statistics",
-      icon: "bar-chart-2",
       callback: () => {
         this.showDocumentStatistics();
-      }
-    });
-    this.addCommand({
-      id: "export-clean-markdown",
-      name: "Export Clean Markdown (without annotations)",
-      icon: "file-text",
-      callback: () => {
-        this.exportCleanMarkdown();
       }
     });
   }
@@ -162,7 +138,7 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     }
   }
   // ============================================================================
-  // AUTHOR TOOLBAR (docked below Arcadia Toolbar)
+  // AUTHOR TOOLBAR
   // ============================================================================
   removeAuthorToolbar() {
     if (this.authorToolbarEl) {
@@ -178,7 +154,8 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     const editorEl = activeView.containerEl.querySelector(".cm-editor");
     if (!editorEl)
       return;
-    this.authorToolbarEl = createEl("div", { cls: "arcadia-author-toolbar" });
+    this.authorToolbarEl = document.createElement("div");
+    this.authorToolbarEl.className = "arcadia-author-toolbar";
     if (this.settings.enableComments) {
       const commentBtn = this.createToolbarButton("message-square-plus", "Add Comment", () => {
         this.addComment(activeView.editor, activeView);
@@ -188,29 +165,14 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
         this.toggleCommentsPanel();
       });
       this.authorToolbarEl.appendChild(togglePanelBtn);
+      const sep = document.createElement("div");
+      sep.className = "arcadia-author-separator";
+      this.authorToolbarEl.appendChild(sep);
     }
-    if (this.settings.enableComments && this.settings.enableTrackChanges) {
-      this.authorToolbarEl.appendChild(createEl("div", { cls: "arcadia-author-separator" }));
-    }
-    if (this.settings.enableTrackChanges) {
-      const trackBtn = this.createToolbarButton("git-compare", "Track Changes", () => {
-        new import_obsidian.Notice("Track Changes feature coming in Phase 2");
-      });
-      trackBtn.addClass("is-disabled");
-      this.authorToolbarEl.appendChild(trackBtn);
-    }
-    this.authorToolbarEl.appendChild(createEl("div", { cls: "arcadia-author-separator" }));
     const statsBtn = this.createToolbarButton("bar-chart-2", "Document Statistics", () => {
       this.showDocumentStatistics();
     });
     this.authorToolbarEl.appendChild(statsBtn);
-    if (this.settings.enableTOC) {
-      const tocBtn = this.createToolbarButton("list-tree", "Table of Contents", () => {
-        new import_obsidian.Notice("Table of Contents feature coming in Phase 2");
-      });
-      tocBtn.addClass("is-disabled");
-      this.authorToolbarEl.appendChild(tocBtn);
-    }
     const arcadiaToolbar = editorEl.querySelector(".arcadia-toolbar");
     const cmScroller = editorEl.querySelector(".cm-scroller");
     if (arcadiaToolbar) {
@@ -220,10 +182,10 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     }
   }
   createToolbarButton(icon, tooltip, onClick) {
-    const btn = createEl("button", {
-      cls: "arcadia-author-button",
-      attr: { "aria-label": tooltip, title: tooltip }
-    });
+    const btn = document.createElement("button");
+    btn.className = "arcadia-author-button";
+    btn.setAttribute("aria-label", tooltip);
+    btn.setAttribute("title", tooltip);
     (0, import_obsidian.setIcon)(btn, icon);
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -255,16 +217,14 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
       } else {
         this.currentAnnotations.set(file.path, {
           version: "1.0.0",
-          comments: [],
-          trackChanges: []
+          comments: []
         });
       }
     } catch (error) {
       console.error("Error loading annotations:", error);
       this.currentAnnotations.set(file.path, {
         version: "1.0.0",
-        comments: [],
-        trackChanges: []
+        comments: []
       });
     }
   }
@@ -328,8 +288,8 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     }).open();
   }
   toggleCommentsPanel() {
-    if (this.commentsPanelEl && this.commentsPanelEl.isShown()) {
-      this.commentsPanelEl.hide();
+    if (this.commentsPanelEl && this.commentsPanelEl.style.display !== "none") {
+      this.commentsPanelEl.style.display = "none";
     } else {
       this.showCommentsPanel();
     }
@@ -341,11 +301,12 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
       return;
     }
     if (!this.commentsPanelEl) {
-      this.commentsPanelEl = createEl("div", { cls: "arcadia-comments-panel" });
+      this.commentsPanelEl = document.createElement("div");
+      this.commentsPanelEl.className = "arcadia-comments-panel";
       document.body.appendChild(this.commentsPanelEl);
     }
     this.updateCommentsPanel();
-    this.commentsPanelEl.show();
+    this.commentsPanelEl.style.display = "flex";
   }
   updateCommentsPanel() {
     if (!this.commentsPanelEl)
@@ -356,58 +317,76 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     const annotations = this.currentAnnotations.get(activeView.file.path);
     if (!annotations)
       return;
-    this.commentsPanelEl.empty();
-    const header = this.commentsPanelEl.createEl("div", { cls: "arcadia-comments-header" });
-    header.createEl("h3", { text: "Comments" });
-    const closeBtn = header.createEl("button", { cls: "arcadia-comments-close" });
+    this.commentsPanelEl.innerHTML = "";
+    const header = document.createElement("div");
+    header.className = "arcadia-comments-header";
+    const title = document.createElement("h3");
+    title.textContent = "Comments";
+    header.appendChild(title);
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "arcadia-comments-close";
     (0, import_obsidian.setIcon)(closeBtn, "x");
     closeBtn.addEventListener("click", () => {
-      var _a;
-      return (_a = this.commentsPanelEl) == null ? void 0 : _a.hide();
+      if (this.commentsPanelEl) {
+        this.commentsPanelEl.style.display = "none";
+      }
     });
-    const list = this.commentsPanelEl.createEl("div", { cls: "arcadia-comments-list" });
+    header.appendChild(closeBtn);
+    this.commentsPanelEl.appendChild(header);
+    const list = document.createElement("div");
+    list.className = "arcadia-comments-list";
     const visibleComments = annotations.comments.filter(
       (c) => this.settings.showResolvedComments || !c.resolved
     );
     if (visibleComments.length === 0) {
-      list.createEl("p", {
-        text: 'No comments yet. Select text and click "Add Comment" to create one.',
-        cls: "arcadia-comments-empty"
-      });
+      const empty = document.createElement("p");
+      empty.className = "arcadia-comments-empty";
+      empty.textContent = 'No comments yet. Select text and click "Add Comment" to create one.';
+      list.appendChild(empty);
     } else {
       visibleComments.forEach((comment) => {
         const commentEl = this.createCommentElement(comment, activeView.file);
         list.appendChild(commentEl);
       });
     }
+    this.commentsPanelEl.appendChild(list);
   }
   createCommentElement(comment, file) {
-    const el = createEl("div", { cls: "arcadia-comment" });
+    const el = document.createElement("div");
+    el.className = "arcadia-comment";
     if (comment.resolved) {
-      el.addClass("is-resolved");
+      el.classList.add("is-resolved");
     }
-    const headerEl = el.createEl("div", { cls: "arcadia-comment-header" });
-    headerEl.createEl("span", { text: comment.author, cls: "arcadia-comment-author" });
-    headerEl.createEl("span", {
-      text: new Date(comment.createdAt).toLocaleDateString(),
-      cls: "arcadia-comment-date"
-    });
-    el.createEl("p", { text: comment.text, cls: "arcadia-comment-text" });
-    const actionsEl = el.createEl("div", { cls: "arcadia-comment-actions" });
-    const resolveBtn = actionsEl.createEl("button", {
-      text: comment.resolved ? "Unresolve" : "Resolve",
-      cls: "arcadia-comment-action"
-    });
+    const headerEl = document.createElement("div");
+    headerEl.className = "arcadia-comment-header";
+    const authorEl = document.createElement("span");
+    authorEl.className = "arcadia-comment-author";
+    authorEl.textContent = comment.author;
+    headerEl.appendChild(authorEl);
+    const dateEl = document.createElement("span");
+    dateEl.className = "arcadia-comment-date";
+    dateEl.textContent = new Date(comment.createdAt).toLocaleDateString();
+    headerEl.appendChild(dateEl);
+    el.appendChild(headerEl);
+    const textEl = document.createElement("p");
+    textEl.className = "arcadia-comment-text";
+    textEl.textContent = comment.text;
+    el.appendChild(textEl);
+    const actionsEl = document.createElement("div");
+    actionsEl.className = "arcadia-comment-actions";
+    const resolveBtn = document.createElement("button");
+    resolveBtn.className = "arcadia-comment-action";
+    resolveBtn.textContent = comment.resolved ? "Unresolve" : "Resolve";
     resolveBtn.addEventListener("click", async () => {
       comment.resolved = !comment.resolved;
       comment.updatedAt = new Date().toISOString();
       await this.saveAnnotationsForFile(file);
       this.updateCommentsPanel();
     });
-    const deleteBtn = actionsEl.createEl("button", {
-      text: "Delete",
-      cls: "arcadia-comment-action arcadia-comment-delete"
-    });
+    actionsEl.appendChild(resolveBtn);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "arcadia-comment-action arcadia-comment-delete";
+    deleteBtn.textContent = "Delete";
     deleteBtn.addEventListener("click", async () => {
       const annotations = this.currentAnnotations.get(file.path);
       if (annotations) {
@@ -417,32 +396,8 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
         new import_obsidian.Notice("Comment deleted");
       }
     });
-    if (comment.replies.length > 0) {
-      const repliesEl = el.createEl("div", { cls: "arcadia-comment-replies" });
-      comment.replies.forEach((reply) => {
-        const replyEl = repliesEl.createEl("div", { cls: "arcadia-comment-reply" });
-        replyEl.createEl("span", { text: reply.author, cls: "arcadia-comment-author" });
-        replyEl.createEl("p", { text: reply.text });
-      });
-    }
-    const replyBtn = actionsEl.createEl("button", {
-      text: "Reply",
-      cls: "arcadia-comment-action"
-    });
-    replyBtn.addEventListener("click", () => {
-      new AddReplyModal(this.app, this.settings.defaultAuthor, async (replyText, author) => {
-        const reply = {
-          id: this.generateId(),
-          text: replyText,
-          author,
-          createdAt: new Date().toISOString()
-        };
-        comment.replies.push(reply);
-        comment.updatedAt = new Date().toISOString();
-        await this.saveAnnotationsForFile(file);
-        this.updateCommentsPanel();
-      }).open();
-    });
+    actionsEl.appendChild(deleteBtn);
+    el.appendChild(actionsEl);
     return el;
   }
   async resolveAllComments() {
@@ -512,19 +467,6 @@ var ArcadiaAuthorPlugin = class extends import_obsidian.Plugin {
     new DocumentStatisticsModal(this.app, stats).open();
   }
   // ============================================================================
-  // EXPORT FUNCTIONS
-  // ============================================================================
-  async exportCleanMarkdown() {
-    const activeView = this.app.workspace.getActiveViewOfType(import_obsidian.MarkdownView);
-    if (!(activeView == null ? void 0 : activeView.file)) {
-      new import_obsidian.Notice("No active document");
-      return;
-    }
-    const content = activeView.editor.getValue();
-    await navigator.clipboard.writeText(content);
-    new import_obsidian.Notice("Clean markdown copied to clipboard");
-  }
-  // ============================================================================
   // UTILITIES
   // ============================================================================
   generateId() {
@@ -541,60 +483,30 @@ var AddCommentModal = class extends import_obsidian.Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.addClass("arcadia-modal");
-    contentEl.createEl("h2", { text: "Add Comment" });
-    const selectionEl = contentEl.createEl("div", { cls: "arcadia-modal-selection" });
-    selectionEl.createEl("label", { text: "Selected text:" });
-    selectionEl.createEl("blockquote", { text: this.selection });
-    const authorSetting = new import_obsidian.Setting(contentEl).setName("Author").addText((text) => text.setValue(this.defaultAuthor).setPlaceholder("Your name"));
-    let commentText = "";
-    const commentSetting = new import_obsidian.Setting(contentEl).setName("Comment").addTextArea((textarea) => {
-      textarea.setPlaceholder("Enter your comment...");
-      textarea.inputEl.rows = 4;
-      textarea.onChange((value) => commentText = value);
-    });
-    new import_obsidian.Setting(contentEl).addButton((btn) => btn.setButtonText("Cancel").onClick(() => this.close())).addButton((btn) => btn.setButtonText("Add Comment").setCta().onClick(() => {
-      if (commentText.trim()) {
-        const authorInput = authorSetting.controlEl.querySelector("input");
-        const author = (authorInput == null ? void 0 : authorInput.value) || this.defaultAuthor;
-        this.onSubmit(commentText.trim(), author);
+    const title = contentEl.createEl("h2", { text: "Add Comment" });
+    const selectionDiv = contentEl.createEl("div", { cls: "arcadia-modal-selection" });
+    selectionDiv.createEl("label", { text: "Selected text:" });
+    selectionDiv.createEl("blockquote", { text: this.selection });
+    const authorDiv = contentEl.createEl("div", { cls: "setting-item" });
+    authorDiv.createEl("label", { text: "Author" });
+    this.authorInput = authorDiv.createEl("input", { type: "text", value: this.defaultAuthor });
+    const commentDiv = contentEl.createEl("div", { cls: "setting-item" });
+    commentDiv.createEl("label", { text: "Comment" });
+    this.commentInput = commentDiv.createEl("textarea", { placeholder: "Enter your comment..." });
+    this.commentInput.rows = 4;
+    const buttonDiv = contentEl.createEl("div", { cls: "arcadia-modal-buttons" });
+    const cancelBtn = buttonDiv.createEl("button", { text: "Cancel" });
+    cancelBtn.addEventListener("click", () => this.close());
+    const submitBtn = buttonDiv.createEl("button", { text: "Add Comment", cls: "mod-cta" });
+    submitBtn.addEventListener("click", () => {
+      const text = this.commentInput.value.trim();
+      if (text) {
+        this.onSubmit(text, this.authorInput.value || this.defaultAuthor);
         this.close();
       } else {
         new import_obsidian.Notice("Please enter a comment");
       }
-    }));
-  }
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-  }
-};
-var AddReplyModal = class extends import_obsidian.Modal {
-  constructor(app, defaultAuthor, onSubmit) {
-    super(app);
-    this.defaultAuthor = defaultAuthor;
-    this.onSubmit = onSubmit;
-  }
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.addClass("arcadia-modal");
-    contentEl.createEl("h2", { text: "Add Reply" });
-    const authorSetting = new import_obsidian.Setting(contentEl).setName("Author").addText((text) => text.setValue(this.defaultAuthor).setPlaceholder("Your name"));
-    let replyText = "";
-    new import_obsidian.Setting(contentEl).setName("Reply").addTextArea((textarea) => {
-      textarea.setPlaceholder("Enter your reply...");
-      textarea.inputEl.rows = 3;
-      textarea.onChange((value) => replyText = value);
     });
-    new import_obsidian.Setting(contentEl).addButton((btn) => btn.setButtonText("Cancel").onClick(() => this.close())).addButton((btn) => btn.setButtonText("Add Reply").setCta().onClick(() => {
-      if (replyText.trim()) {
-        const authorInput = authorSetting.controlEl.querySelector("input");
-        const author = (authorInput == null ? void 0 : authorInput.value) || this.defaultAuthor;
-        this.onSubmit(replyText.trim(), author);
-        this.close();
-      } else {
-        new import_obsidian.Notice("Please enter a reply");
-      }
-    }));
   }
   onClose() {
     const { contentEl } = this;
@@ -617,7 +529,9 @@ var DocumentStatisticsModal = class extends import_obsidian.Modal {
     this.createStatItem(statsGrid, "Sentences", this.stats.sentences.toLocaleString());
     this.createStatItem(statsGrid, "Paragraphs", this.stats.paragraphs.toLocaleString());
     this.createStatItem(statsGrid, "Reading Time", `${this.stats.readingTime} min`);
-    new import_obsidian.Setting(contentEl).addButton((btn) => btn.setButtonText("Close").setCta().onClick(() => this.close()));
+    const buttonDiv = contentEl.createEl("div", { cls: "arcadia-modal-buttons" });
+    const closeBtn = buttonDiv.createEl("button", { text: "Close", cls: "mod-cta" });
+    closeBtn.addEventListener("click", () => this.close());
   }
   createStatItem(container, label, value) {
     const item = container.createEl("div", { cls: "arcadia-stat-item" });
@@ -643,20 +557,8 @@ var ArcadiaAuthorSettingTab = class extends import_obsidian.PluginSettingTab {
       this.plugin.settings.enableComments = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian.Setting(containerEl).setName("Enable Track Changes").setDesc("Track insertions and deletions (Phase 2 feature)").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableTrackChanges).setDisabled(true).onChange(async (value) => {
-      this.plugin.settings.enableTrackChanges = value;
-      await this.plugin.saveSettings();
-    }));
     new import_obsidian.Setting(containerEl).setName("Enable Word Count").setDesc("Show word count and reading statistics").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableWordCount).onChange(async (value) => {
       this.plugin.settings.enableWordCount = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian.Setting(containerEl).setName("Enable Auto-Numbering").setDesc("Automatically number headings (Phase 2 feature)").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableAutoNumbering).setDisabled(true).onChange(async (value) => {
-      this.plugin.settings.enableAutoNumbering = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian.Setting(containerEl).setName("Enable Table of Contents").setDesc("Generate table of contents (Phase 2 feature)").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableTOC).setDisabled(true).onChange(async (value) => {
-      this.plugin.settings.enableTOC = value;
       await this.plugin.saveSettings();
     }));
     containerEl.createEl("h3", { text: "Comments" });
@@ -683,10 +585,6 @@ var ArcadiaAuthorSettingTab = class extends import_obsidian.PluginSettingTab {
     }));
     new import_obsidian.Setting(containerEl).setName("Words Per Minute").setDesc("Average reading speed for time estimates").addSlider((slider) => slider.setLimits(100, 400, 25).setValue(this.plugin.settings.wordsPerMinute).setDynamicTooltip().onChange(async (value) => {
       this.plugin.settings.wordsPerMinute = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian.Setting(containerEl).setName("Word Count Position").setDesc("Where to display the word count").addDropdown((dropdown) => dropdown.addOption("statusbar", "Status Bar").addOption("toolbar", "Author Toolbar").setValue(this.plugin.settings.wordCountPosition).onChange(async (value) => {
-      this.plugin.settings.wordCountPosition = value;
       await this.plugin.saveSettings();
     }));
   }

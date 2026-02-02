@@ -62,85 +62,71 @@ var ArcadiaToolbarPlugin = class extends import_obsidian.Plugin {
     this.addCommand({
       id: "toggle-bold",
       name: "Toggle Bold",
-      icon: "bold",
       editorCallback: (editor) => this.toggleBold(editor)
     });
     this.addCommand({
       id: "toggle-italic",
       name: "Toggle Italic",
-      icon: "italic",
       editorCallback: (editor) => this.toggleItalic(editor)
     });
     this.addCommand({
       id: "toggle-strikethrough",
       name: "Toggle Strikethrough",
-      icon: "strikethrough",
       editorCallback: (editor) => this.toggleStrikethrough(editor)
     });
     this.addCommand({
       id: "toggle-highlight",
       name: "Toggle Highlight",
-      icon: "highlighter",
       editorCallback: (editor) => this.toggleHighlight(editor)
     });
     this.addCommand({
       id: "insert-heading-1",
       name: "Insert Heading 1",
-      icon: "heading-1",
       editorCallback: (editor) => this.insertHeading(editor, 1)
     });
     this.addCommand({
       id: "insert-heading-2",
       name: "Insert Heading 2",
-      icon: "heading-2",
       editorCallback: (editor) => this.insertHeading(editor, 2)
     });
     this.addCommand({
       id: "insert-heading-3",
       name: "Insert Heading 3",
-      icon: "heading-3",
       editorCallback: (editor) => this.insertHeading(editor, 3)
     });
     this.addCommand({
       id: "toggle-bullet-list",
       name: "Toggle Bullet List",
-      icon: "list",
       editorCallback: (editor) => this.toggleBulletList(editor)
     });
     this.addCommand({
       id: "toggle-numbered-list",
       name: "Toggle Numbered List",
-      icon: "list-ordered",
       editorCallback: (editor) => this.toggleNumberedList(editor)
     });
     this.addCommand({
       id: "toggle-blockquote",
       name: "Toggle Blockquote",
-      icon: "quote",
       editorCallback: (editor) => this.toggleBlockquote(editor)
     });
     this.addCommand({
       id: "insert-link",
       name: "Insert Link",
-      icon: "link",
       editorCallback: (editor) => this.insertLink(editor)
     });
     this.addCommand({
       id: "toggle-inline-code",
       name: "Toggle Inline Code",
-      icon: "code",
       editorCallback: (editor) => this.toggleInlineCode(editor)
     });
     this.addCommand({
       id: "insert-code-block",
       name: "Insert Code Block",
-      icon: "code-2",
       editorCallback: (editor) => this.insertCodeBlock(editor)
     });
     this.addCommand({
       id: "insert-scripture-block",
       name: "Insert Scripture Block",
-      icon: "book-open",
       editorCallback: (editor) => this.insertScriptureBlock(editor)
     });
     this.addSettingTab(new ArcadiaToolbarSettingTab(this.app, this));
@@ -172,7 +158,8 @@ var ArcadiaToolbarPlugin = class extends import_obsidian.Plugin {
     const editorEl = activeView.containerEl.querySelector(".cm-editor");
     if (!editorEl)
       return;
-    this.toolbarEl = createEl("div", { cls: "arcadia-toolbar" });
+    this.toolbarEl = document.createElement("div");
+    this.toolbarEl.className = "arcadia-toolbar";
     const buttons = [
       {
         id: "bold",
@@ -266,7 +253,7 @@ var ArcadiaToolbarPlugin = class extends import_obsidian.Plugin {
       },
       {
         id: "code-block",
-        icon: "code-2",
+        icon: "file-code",
         tooltip: "Code Block",
         action: (editor) => this.insertCodeBlock(editor),
         settingKey: "showCode"
@@ -281,18 +268,20 @@ var ArcadiaToolbarPlugin = class extends import_obsidian.Plugin {
         settingKey: "showScripture"
       }
     ];
-    buttons.forEach((btn) => {
+    for (const btn of buttons) {
       if (btn.id.startsWith("separator")) {
-        const separator = this.toolbarEl.createEl("div", { cls: "arcadia-toolbar-separator" });
-        return;
+        const separator = document.createElement("div");
+        separator.className = "arcadia-toolbar-separator";
+        this.toolbarEl.appendChild(separator);
+        continue;
       }
       if (btn.settingKey && !this.settings[btn.settingKey]) {
-        return;
+        continue;
       }
-      const buttonEl = this.toolbarEl.createEl("button", {
-        cls: "arcadia-toolbar-button",
-        attr: { "aria-label": btn.tooltip, title: btn.tooltip }
-      });
+      const buttonEl = document.createElement("button");
+      buttonEl.className = "arcadia-toolbar-button";
+      buttonEl.setAttribute("aria-label", btn.tooltip);
+      buttonEl.setAttribute("title", btn.tooltip);
       (0, import_obsidian.setIcon)(buttonEl, btn.icon);
       buttonEl.addEventListener("click", (e) => {
         e.preventDefault();
@@ -301,7 +290,8 @@ var ArcadiaToolbarPlugin = class extends import_obsidian.Plugin {
           btn.action(editor);
         }
       });
-    });
+      this.toolbarEl.appendChild(buttonEl);
+    }
     const cmScroller = editorEl.querySelector(".cm-scroller");
     if (cmScroller && this.settings.toolbarPosition === "top") {
       editorEl.insertBefore(this.toolbarEl, cmScroller);

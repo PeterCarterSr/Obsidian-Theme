@@ -70,98 +70,84 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		this.addCommand({
 			id: 'toggle-bold',
 			name: 'Toggle Bold',
-			icon: 'bold',
 			editorCallback: (editor: Editor) => this.toggleBold(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-italic',
 			name: 'Toggle Italic',
-			icon: 'italic',
 			editorCallback: (editor: Editor) => this.toggleItalic(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-strikethrough',
 			name: 'Toggle Strikethrough',
-			icon: 'strikethrough',
 			editorCallback: (editor: Editor) => this.toggleStrikethrough(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-highlight',
 			name: 'Toggle Highlight',
-			icon: 'highlighter',
 			editorCallback: (editor: Editor) => this.toggleHighlight(editor)
 		});
 
 		this.addCommand({
 			id: 'insert-heading-1',
 			name: 'Insert Heading 1',
-			icon: 'heading-1',
 			editorCallback: (editor: Editor) => this.insertHeading(editor, 1)
 		});
 
 		this.addCommand({
 			id: 'insert-heading-2',
 			name: 'Insert Heading 2',
-			icon: 'heading-2',
 			editorCallback: (editor: Editor) => this.insertHeading(editor, 2)
 		});
 
 		this.addCommand({
 			id: 'insert-heading-3',
 			name: 'Insert Heading 3',
-			icon: 'heading-3',
 			editorCallback: (editor: Editor) => this.insertHeading(editor, 3)
 		});
 
 		this.addCommand({
 			id: 'toggle-bullet-list',
 			name: 'Toggle Bullet List',
-			icon: 'list',
 			editorCallback: (editor: Editor) => this.toggleBulletList(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-numbered-list',
 			name: 'Toggle Numbered List',
-			icon: 'list-ordered',
 			editorCallback: (editor: Editor) => this.toggleNumberedList(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-blockquote',
 			name: 'Toggle Blockquote',
-			icon: 'quote',
 			editorCallback: (editor: Editor) => this.toggleBlockquote(editor)
 		});
 
 		this.addCommand({
 			id: 'insert-link',
 			name: 'Insert Link',
-			icon: 'link',
 			editorCallback: (editor: Editor) => this.insertLink(editor)
 		});
 
 		this.addCommand({
 			id: 'toggle-inline-code',
 			name: 'Toggle Inline Code',
-			icon: 'code',
 			editorCallback: (editor: Editor) => this.toggleInlineCode(editor)
 		});
 
 		this.addCommand({
 			id: 'insert-code-block',
 			name: 'Insert Code Block',
-			icon: 'code-2',
 			editorCallback: (editor: Editor) => this.insertCodeBlock(editor)
 		});
 
 		this.addCommand({
 			id: 'insert-scripture-block',
 			name: 'Insert Scripture Block',
-			icon: 'book-open',
 			editorCallback: (editor: Editor) => this.insertScriptureBlock(editor)
 		});
 
@@ -203,8 +189,9 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		const editorEl = activeView.containerEl.querySelector('.cm-editor');
 		if (!editorEl) return;
 
-		// Create toolbar
-		this.toolbarEl = createEl('div', { cls: 'arcadia-toolbar' });
+		// Create toolbar using standard DOM methods
+		this.toolbarEl = document.createElement('div');
+		this.toolbarEl.className = 'arcadia-toolbar';
 
 		// Define toolbar buttons
 		const buttons: ToolbarButton[] = [
@@ -297,7 +284,7 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 			},
 			{
 				id: 'code-block',
-				icon: 'code-2',
+				icon: 'file-code',
 				tooltip: 'Code Block',
 				action: (editor) => this.insertCodeBlock(editor),
 				settingKey: 'showCode'
@@ -313,21 +300,23 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 		];
 
 		// Create buttons
-		buttons.forEach(btn => {
+		for (const btn of buttons) {
 			if (btn.id.startsWith('separator')) {
-				const separator = this.toolbarEl!.createEl('div', { cls: 'arcadia-toolbar-separator' });
-				return;
+				const separator = document.createElement('div');
+				separator.className = 'arcadia-toolbar-separator';
+				this.toolbarEl.appendChild(separator);
+				continue;
 			}
 
 			// Check if button should be shown based on settings
 			if (btn.settingKey && !this.settings[btn.settingKey]) {
-				return;
+				continue;
 			}
 
-			const buttonEl = this.toolbarEl!.createEl('button', {
-				cls: 'arcadia-toolbar-button',
-				attr: { 'aria-label': btn.tooltip, title: btn.tooltip }
-			});
+			const buttonEl = document.createElement('button');
+			buttonEl.className = 'arcadia-toolbar-button';
+			buttonEl.setAttribute('aria-label', btn.tooltip);
+			buttonEl.setAttribute('title', btn.tooltip);
 			setIcon(buttonEl, btn.icon);
 
 			buttonEl.addEventListener('click', (e) => {
@@ -337,7 +326,9 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 					btn.action(editor);
 				}
 			});
-		});
+
+			this.toolbarEl.appendChild(buttonEl);
+		}
 
 		// Insert toolbar into DOM
 		const cmScroller = editorEl.querySelector('.cm-scroller');
@@ -476,9 +467,7 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 	insertLink(editor: Editor) {
 		const selection = editor.getSelection();
 		if (selection) {
-			// If there's a URL in clipboard, use it
 			editor.replaceSelection(`[${selection}](url)`);
-			// Select 'url' for easy replacement
 			const cursor = editor.getCursor();
 			editor.setSelection(
 				{ line: cursor.line, ch: cursor.ch - 4 },
@@ -529,7 +518,6 @@ export default class ArcadiaToolbarPlugin extends Plugin {
 `;
 
 		editor.replaceRange(scriptureBlock, cursor);
-		// Position cursor at the reference line for easy editing
 		editor.setCursor({ line: cursor.line + 1, ch: 3 });
 	}
 }
