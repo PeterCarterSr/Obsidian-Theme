@@ -226,6 +226,8 @@ settings:
         value: ctp-slate
       - label: Amber (Golden Warmth)
         value: ctp-amber
+      - label: Crownwell (Classic Publishing)
+        value: ctp-crownwell
   - id: arcadia-light-scheme
     title: Light Theme Flavor
     description: Select your preferred light mode color scheme
@@ -257,8 +259,6 @@ settings:
         value: ctp-nytimes
       - label: Wikipedia (Encyclopedia)
         value: ctp-wikipedia
-      - label: Crownwell (Classic Publishing)
-        value: ctp-crownwell
 */
 
 /* @settings
@@ -1738,76 +1738,101 @@ settings:
 }
 
 
-/* ====== Light Theme: Crownwell (Classic Publishing) ======
+/* ====== Dark Theme: Crownwell (Classic Publishing) ======
    Inspired by Crownwell Press's elegant publishing aesthetic.
-   Cream and white backgrounds with gold accents.
+   Black UI with gold accents, white reading panel.
    Sophisticated serif typography for scholarly reading.
    Best for: Academic writing, manuscripts, theological works */
-.theme-light.ctp-crownwell {
-    --ctp-crust: 245, 240, 232;      /* Warm cream #F5F0E8 */
-    --ctp-base: 255, 255, 255;       /* Pure white */
-    --ctp-mantle: 250, 248, 245;     /* Light cream #FAF8F5 */
-    --ctp-text: 61, 68, 73;          /* Dark charcoal #3D4449 */
+.theme-dark.ctp-crownwell {
+    --ctp-crust: 30, 30, 30;         /* Dark gray for sidebars #1E1E1E */
+    --ctp-base: 0, 0, 0;             /* Pure black for UI */
+    --ctp-mantle: 45, 45, 45;        /* Slightly lighter gray #2D2D2D */
+    --ctp-text: 220, 220, 220;       /* Light gray text #DCDCDC */
+    --ctp-surface0: 50, 50, 50;      /* Surface color */
+    --ctp-surface1: 60, 60, 60;      /* Surface color */
 
-    /* Crownwell-style borders - subtle warm gray */
-    --divider-color: rgba(61, 68, 73, 0.15);
-    --divider-color-hover: rgba(61, 68, 73, 0.25);
+    /* Crownwell-style borders */
+    --divider-color: rgba(201, 162, 39, 0.3);
+    --divider-color-hover: rgba(201, 162, 39, 0.5);
     --hr-color: rgba(201, 162, 39, 0.6);
-    --table-border-color: rgba(61, 68, 73, 0.2);
-    --background-modifier-border: rgba(61, 68, 73, 0.12);
+    --table-border-color: rgba(201, 162, 39, 0.3);
+    --background-modifier-border: rgba(201, 162, 39, 0.2);
 
     --background-secondary: rgb(var(--ctp-crust));
     --background-secondary-alt: rgb(var(--ctp-mantle));
 
+    /* Text colors for dark theme */
+    --text-normal: #DCDCDC;
+    --text-muted: #B0B0B0;
+    --text-faint: #808080;
+
     /* Crownwell gold for links and accents */
     --ctp-accent: 201, 162, 39;      /* Antique gold #C9A227 */
-    --ctp-accent-hover: 184, 134, 11; /* Darker gold #B8860B */
+    --ctp-accent-hover: 212, 175, 55; /* Brighter gold #D4AF37 */
 }
 
-/* Crownwell sidebar - elegant and warm */
-.theme-light.ctp-crownwell .nav-folder-title,
-.theme-light.ctp-crownwell .workspace-ribbon {
-    color: #3D4449 !important;
+/* Crownwell sidebar - light text on dark background */
+.theme-dark.ctp-crownwell .nav-folder-title,
+.theme-dark.ctp-crownwell .workspace-ribbon {
+    color: #DCDCDC !important;
 }
 
-.theme-light.ctp-crownwell .nav-folder-title .nav-folder-title-content {
-    color: #3D4449 !important;
+.theme-dark.ctp-crownwell .nav-folder-title .nav-folder-title-content {
+    color: #DCDCDC !important;
     font-weight: 500;
 }
 
-.theme-light.ctp-crownwell .nav-file-title .nav-file-title-content {
-    color: #5a6268 !important;
+.theme-dark.ctp-crownwell .nav-file-title .nav-file-title-content {
+    color: #B0B0B0 !important;
+}
+
+/* Sidebar background - dark gray */
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split,
+.theme-dark.ctp-crownwell .nav-files-container {
+    background: #1E1E1E !important;
 }
 
 /* Crownwell typography - elegant Cormorant Garamond */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 
-.theme-light.ctp-crownwell .markdown-preview-view,
-.theme-light.ctp-crownwell .cm-line,
-.theme-light.ctp-crownwell .cm-s-obsidian {
+/* Reading panel - WHITE background with dark text */
+.theme-dark.ctp-crownwell .workspace-leaf-content,
+.theme-dark.ctp-crownwell .markdown-preview-view,
+.theme-dark.ctp-crownwell .markdown-source-view,
+.theme-dark.ctp-crownwell .cm-content,
+.theme-dark.ctp-crownwell .cm-scroller {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+
+.theme-dark.ctp-crownwell .markdown-preview-view,
+.theme-dark.ctp-crownwell .cm-line,
+.theme-dark.ctp-crownwell .cm-s-obsidian {
     font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif !important;
     font-size: 17px;
     line-height: 1.7;
     color: #3D4449 !important;
+    background: #FFFFFF !important;
 }
 
-.theme-light.ctp-crownwell h1,
-.theme-light.ctp-crownwell h2,
-.theme-light.ctp-crownwell h3,
-.theme-light.ctp-crownwell h4,
-.theme-light.ctp-crownwell .markdown-rendered h1,
-.theme-light.ctp-crownwell .markdown-rendered h2,
-.theme-light.ctp-crownwell .markdown-rendered h3,
-.theme-light.ctp-crownwell .markdown-rendered h4 {
+.theme-dark.ctp-crownwell h1,
+.theme-dark.ctp-crownwell h2,
+.theme-dark.ctp-crownwell h3,
+.theme-dark.ctp-crownwell h4,
+.theme-dark.ctp-crownwell .markdown-rendered h1,
+.theme-dark.ctp-crownwell .markdown-rendered h2,
+.theme-dark.ctp-crownwell .markdown-rendered h3,
+.theme-dark.ctp-crownwell .markdown-rendered h4 {
     font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif !important;
     font-weight: 500;
     color: #2D3436 !important;
     letter-spacing: 0.02em;
 }
 
-.theme-light.ctp-crownwell h1,
-.theme-light.ctp-crownwell .markdown-rendered h1 {
+.theme-dark.ctp-crownwell h1,
+.theme-dark.ctp-crownwell .markdown-rendered h1 {
     font-size: 2.4em;
     font-weight: 400;
     text-align: center;
@@ -1817,8 +1842,8 @@ settings:
 }
 
 /* Gold underline accent for H1 */
-.theme-light.ctp-crownwell h1::after,
-.theme-light.ctp-crownwell .markdown-rendered h1::after {
+.theme-dark.ctp-crownwell h1::after,
+.theme-dark.ctp-crownwell .markdown-rendered h1::after {
     content: "";
     display: block;
     width: 80px;
@@ -1827,8 +1852,8 @@ settings:
     margin: 0.5em auto 0 auto;
 }
 
-.theme-light.ctp-crownwell h2,
-.theme-light.ctp-crownwell .markdown-rendered h2 {
+.theme-dark.ctp-crownwell h2,
+.theme-dark.ctp-crownwell .markdown-rendered h2 {
     font-size: 1.8em;
     font-weight: 500;
     border-bottom: none;
@@ -1836,8 +1861,8 @@ settings:
 }
 
 /* Gold underline for H2 */
-.theme-light.ctp-crownwell h2::after,
-.theme-light.ctp-crownwell .markdown-rendered h2::after {
+.theme-dark.ctp-crownwell h2::after,
+.theme-dark.ctp-crownwell .markdown-rendered h2::after {
     content: "";
     display: block;
     width: 60px;
@@ -1846,30 +1871,30 @@ settings:
     margin-top: 0.3em;
 }
 
-.theme-light.ctp-crownwell h3,
-.theme-light.ctp-crownwell .markdown-rendered h3 {
+.theme-dark.ctp-crownwell h3,
+.theme-dark.ctp-crownwell .markdown-rendered h3 {
     font-size: 1.4em;
     font-weight: 600;
     font-style: italic;
 }
 
 /* Crownwell-style links - gold with no underline */
-.theme-light.ctp-crownwell a.internal-link,
-.theme-light.ctp-crownwell a.external-link {
+.theme-dark.ctp-crownwell a.internal-link,
+.theme-dark.ctp-crownwell a.external-link {
     color: #C9A227 !important;
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: border-color 0.2s ease;
 }
 
-.theme-light.ctp-crownwell a.internal-link:hover,
-.theme-light.ctp-crownwell a.external-link:hover {
+.theme-dark.ctp-crownwell a.internal-link:hover,
+.theme-dark.ctp-crownwell a.external-link:hover {
     color: #B8860B !important;
     border-bottom: 1px solid #C9A227;
 }
 
 /* Crownwell blockquotes - elegant with gold border */
-.theme-light.ctp-crownwell blockquote {
+.theme-dark.ctp-crownwell blockquote {
     border-left: 3px solid #C9A227;
     background: rgba(245, 240, 232, 0.5);
     padding: 1em 1.5em;
@@ -1878,7 +1903,7 @@ settings:
 }
 
 /* Crownwell horizontal rules - gold */
-.theme-light.ctp-crownwell hr {
+.theme-dark.ctp-crownwell hr {
     border: none;
     height: 2px;
     background: linear-gradient(90deg, transparent, #C9A227, transparent);
@@ -1886,19 +1911,19 @@ settings:
 }
 
 /* Crownwell code blocks - subtle cream background */
-.theme-light.ctp-crownwell pre,
-.theme-light.ctp-crownwell code {
+.theme-dark.ctp-crownwell pre,
+.theme-dark.ctp-crownwell code {
     background: #FAF8F5 !important;
     border: 1px solid rgba(61, 68, 73, 0.1);
 }
 
 /* Crownwell tables - elegant and minimal */
-.theme-light.ctp-crownwell table {
+.theme-dark.ctp-crownwell table {
     border-collapse: collapse;
     background: #FFFFFF;
 }
 
-.theme-light.ctp-crownwell table th {
+.theme-dark.ctp-crownwell table th {
     background: #F5F0E8;
     border: 1px solid rgba(61, 68, 73, 0.2);
     padding: 0.6em 1em;
@@ -1908,72 +1933,72 @@ settings:
     color: #2D3436;
 }
 
-.theme-light.ctp-crownwell table td {
+.theme-dark.ctp-crownwell table td {
     border: 1px solid rgba(61, 68, 73, 0.15);
     padding: 0.6em 1em;
 }
 
 /* Crownwell callouts - cream with gold accent */
-.theme-light.ctp-crownwell .callout {
+.theme-dark.ctp-crownwell .callout {
     background: rgba(245, 240, 232, 0.6);
     border-left: 3px solid #C9A227;
 }
 
 /* Crownwell editor background - warm white */
-.theme-light.ctp-crownwell .workspace-leaf-content,
-.theme-light.ctp-crownwell .markdown-preview-view {
+.theme-dark.ctp-crownwell .workspace-leaf-content,
+.theme-dark.ctp-crownwell .markdown-preview-view {
     background: #FFFFFF;
 }
 
 /* Crownwell sidebar background - cream */
-.theme-light.ctp-crownwell .workspace-split.mod-left-split,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split {
     background: #F5F0E8;
 }
 
 /* Strong/Bold text - slightly darker */
-.theme-light.ctp-crownwell strong,
-.theme-light.ctp-crownwell b {
+.theme-dark.ctp-crownwell strong,
+.theme-dark.ctp-crownwell b {
     color: #2D3436;
     font-weight: 600;
 }
 
 /* Emphasis/Italic - elegant */
-.theme-light.ctp-crownwell em,
-.theme-light.ctp-crownwell i {
+.theme-dark.ctp-crownwell em,
+.theme-dark.ctp-crownwell i {
     color: #5a6268;
 }
 
 /* ====== Crownwell Dark UI Elements (PURE BLACK #000000, GOLD text, WHITE outlines) ====== */
 
 /* Title bar - PURE BLACK */
-.theme-light.ctp-crownwell .titlebar,
-.theme-light.ctp-crownwell .titlebar-inner,
-.theme-light.ctp-crownwell .mod-top-left-space,
-.theme-light.ctp-crownwell .mod-top-right-space,
-.theme-light.ctp-crownwell .workspace-tab-header-spacer {
+.theme-dark.ctp-crownwell .titlebar,
+.theme-dark.ctp-crownwell .titlebar-inner,
+.theme-dark.ctp-crownwell .mod-top-left-space,
+.theme-dark.ctp-crownwell .mod-top-right-space,
+.theme-dark.ctp-crownwell .workspace-tab-header-spacer {
     background: #000000 !important;
     background-color: #000000 !important;
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .titlebar-text,
-.theme-light.ctp-crownwell .titlebar-inner-text {
+.theme-dark.ctp-crownwell .titlebar-text,
+.theme-dark.ctp-crownwell .titlebar-inner-text {
     color: #C9A227 !important;
 }
 
 /* Tab header container - PURE BLACK */
-.theme-light.ctp-crownwell .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-tab-header-container-inner,
-.theme-light.ctp-crownwell .workspace-tab-container-before,
-.theme-light.ctp-crownwell .workspace-tab-container-after {
+.theme-dark.ctp-crownwell .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-tab-header-container-inner,
+.theme-dark.ctp-crownwell .workspace-tab-container-before,
+.theme-dark.ctp-crownwell .workspace-tab-container-after {
     background: #000000 !important;
     background-color: #000000 !important;
     border-bottom: 1px solid #C9A227 !important;
 }
 
 /* Individual tabs - PURE BLACK with GOLD text and WHITE outline */
-.theme-light.ctp-crownwell .workspace-tab-header {
+.theme-dark.ctp-crownwell .workspace-tab-header {
     background: #000000 !important;
     background-color: #000000 !important;
     color: #C9A227 !important;
@@ -1985,114 +2010,114 @@ settings:
     --text-faint: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-tab-header .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-tab-header .workspace-tab-header-inner-title {
+.theme-dark.ctp-crownwell .workspace-tab-header .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header .workspace-tab-header-inner-title {
     color: #C9A227 !important;
     font-weight: 500 !important;
     --text-normal: #C9A227 !important;
 }
 
 /* FORCE ALL TEXT IN TAB AREA TO BE GOLD */
-.theme-light.ctp-crownwell .workspace-tab-header *,
-.theme-light.ctp-crownwell .workspace-tab-header-container *,
-.theme-light.ctp-crownwell .workspace-tabs * {
+.theme-dark.ctp-crownwell .workspace-tab-header *,
+.theme-dark.ctp-crownwell .workspace-tab-header-container *,
+.theme-dark.ctp-crownwell .workspace-tabs * {
     color: #C9A227 !important;
 }
 
 /* Active tab - brighter GOLD with thicker WHITE border */
-.theme-light.ctp-crownwell .workspace-tab-header.is-active {
+.theme-dark.ctp-crownwell .workspace-tab-header.is-active {
     background: #111111 !important;
     background-color: #111111 !important;
     border: 2px solid #FFFFFF !important;
     border-bottom: none !important;
 }
 
-.theme-light.ctp-crownwell .workspace-tab-header.is-active .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-tab-header.is-active .workspace-tab-header-inner-title,
-.theme-light.ctp-crownwell .workspace-tab-header.is-active * {
+.theme-dark.ctp-crownwell .workspace-tab-header.is-active .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header.is-active .workspace-tab-header-inner-title,
+.theme-dark.ctp-crownwell .workspace-tab-header.is-active * {
     color: #D4AF37 !important;
     font-weight: 600 !important;
 }
 
 /* Tab close button - GOLD */
-.theme-light.ctp-crownwell .workspace-tab-header-inner-close-button,
-.theme-light.ctp-crownwell .workspace-tab-header-inner-close-button svg {
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-close-button,
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-close-button svg {
     color: #C9A227 !important;
     stroke: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-tab-header-inner-close-button:hover,
-.theme-light.ctp-crownwell .workspace-tab-header-inner-close-button:hover svg {
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-close-button:hover,
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-close-button:hover svg {
     color: #FFFFFF !important;
     stroke: #FFFFFF !important;
 }
 
 /* Tab hover state */
-.theme-light.ctp-crownwell .workspace-tab-header:hover {
+.theme-dark.ctp-crownwell .workspace-tab-header:hover {
     background: #111111 !important;
     background-color: #111111 !important;
     border-color: #D4AF37 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-tab-header:hover .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-tab-header:hover .workspace-tab-header-inner-title,
-.theme-light.ctp-crownwell .workspace-tab-header:hover * {
+.theme-dark.ctp-crownwell .workspace-tab-header:hover .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header:hover .workspace-tab-header-inner-title,
+.theme-dark.ctp-crownwell .workspace-tab-header:hover * {
     color: #D4AF37 !important;
 }
 
 /* Left ribbon (icon sidebar) - PURE BLACK */
-.theme-light.ctp-crownwell .workspace-ribbon,
-.theme-light.ctp-crownwell .workspace-ribbon.mod-left {
+.theme-dark.ctp-crownwell .workspace-ribbon,
+.theme-dark.ctp-crownwell .workspace-ribbon.mod-left {
     background: #000000 !important;
     background-color: #000000 !important;
     border-right: 1px solid #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-ribbon .side-dock-ribbon-tab,
-.theme-light.ctp-crownwell .workspace-ribbon .side-dock-ribbon-action {
+.theme-dark.ctp-crownwell .workspace-ribbon .side-dock-ribbon-tab,
+.theme-dark.ctp-crownwell .workspace-ribbon .side-dock-ribbon-action {
     color: #FFFFFF !important;
 }
 
-.theme-light.ctp-crownwell .workspace-ribbon .side-dock-ribbon-tab:hover,
-.theme-light.ctp-crownwell .workspace-ribbon .side-dock-ribbon-action:hover {
+.theme-dark.ctp-crownwell .workspace-ribbon .side-dock-ribbon-tab:hover,
+.theme-dark.ctp-crownwell .workspace-ribbon .side-dock-ribbon-action:hover {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-ribbon .clickable-icon {
+.theme-dark.ctp-crownwell .workspace-ribbon .clickable-icon {
     color: #FFFFFF !important;
 }
 
-.theme-light.ctp-crownwell .workspace-ribbon .clickable-icon:hover {
+.theme-dark.ctp-crownwell .workspace-ribbon .clickable-icon:hover {
     color: #C9A227 !important;
     background: rgba(201, 162, 39, 0.3) !important;
 }
 
 /* Status bar (bottom) - PURE BLACK */
-.theme-light.ctp-crownwell .status-bar {
+.theme-dark.ctp-crownwell .status-bar {
     background: #000000 !important;
     background-color: #000000 !important;
     border-top: 1px solid #C9A227 !important;
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .status-bar-item {
+.theme-dark.ctp-crownwell .status-bar-item {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .status-bar-item:hover {
+.theme-dark.ctp-crownwell .status-bar-item:hover {
     color: #FFFFFF !important;
 }
 
 /* Sidebar tab headers - PURE BLACK */
-.theme-light.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header-container {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header-container {
     background: #000000 !important;
     background-color: #000000 !important;
     border-bottom: 1px solid #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header {
     background: transparent !important;
     color: #C9A227 !important;
     border: 1px solid #FFFFFF !important;
@@ -2100,128 +2125,128 @@ settings:
     margin: 2px !important;
 }
 
-.theme-light.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header .workspace-tab-header-inner {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header .workspace-tab-header-inner {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header.is-active,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header.is-active {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header.is-active,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header.is-active {
     background: #111111 !important;
     border: 2px solid #FFFFFF !important;
 }
 
-.theme-light.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header.is-active .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header.is-active .workspace-tab-header-inner {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split .workspace-tab-header.is-active .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split .workspace-tab-header.is-active .workspace-tab-header-inner {
     color: #D4AF37 !important;
 }
 
 /* View header toolbar - PURE BLACK to match top bar */
-.theme-light.ctp-crownwell .view-header {
+.theme-dark.ctp-crownwell .view-header {
     background: #000000 !important;
     background-color: #000000 !important;
     border-bottom: 1px solid #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .view-header-title {
+.theme-dark.ctp-crownwell .view-header-title {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .view-header-title-container {
+.theme-dark.ctp-crownwell .view-header-title-container {
     background: #000000 !important;
     color: #C9A227 !important;
 }
 
 /* Toolbar buttons - GOLD */
-.theme-light.ctp-crownwell .view-action {
+.theme-dark.ctp-crownwell .view-action {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .view-action:hover {
+.theme-dark.ctp-crownwell .view-action:hover {
     color: #FFFFFF !important;
 }
 
 /* Clickable icons in view header */
-.theme-light.ctp-crownwell .view-header .clickable-icon {
+.theme-dark.ctp-crownwell .view-header .clickable-icon {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .view-header .clickable-icon:hover {
+.theme-dark.ctp-crownwell .view-header .clickable-icon:hover {
     color: #FFFFFF !important;
 }
 
 /* File explorer - CREAM background */
-.theme-light.ctp-crownwell .nav-files-container {
+.theme-dark.ctp-crownwell .nav-files-container {
     background: #F5F0E8 !important;
 }
 
 /* Vault title in sidebar */
-.theme-light.ctp-crownwell .nav-folder.mod-root > .nav-folder-title {
+.theme-dark.ctp-crownwell .nav-folder.mod-root > .nav-folder-title {
     background: #E8E3DB !important;
     color: #000000 !important;
     font-weight: 600;
 }
 
 /* Window frame buttons - GOLD */
-.theme-light.ctp-crownwell .titlebar-button {
+.theme-dark.ctp-crownwell .titlebar-button {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .titlebar-button:hover {
+.theme-dark.ctp-crownwell .titlebar-button:hover {
     color: #FFFFFF !important;
     background: rgba(201, 162, 39, 0.3) !important;
 }
 
 /* New tab button - GOLD */
-.theme-light.ctp-crownwell .workspace-tab-header-new-tab {
+.theme-dark.ctp-crownwell .workspace-tab-header-new-tab {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .workspace-tab-header-new-tab:hover {
+.theme-dark.ctp-crownwell .workspace-tab-header-new-tab:hover {
     color: #FFFFFF !important;
 }
 
 /* Scrollbar in dark areas */
-.theme-light.ctp-crownwell .workspace-ribbon::-webkit-scrollbar-thumb {
+.theme-dark.ctp-crownwell .workspace-ribbon::-webkit-scrollbar-thumb {
     background: rgba(201, 162, 39, 0.5) !important;
 }
 
 /* Sidebar split background */
-.theme-light.ctp-crownwell .workspace-split.mod-left-split,
-.theme-light.ctp-crownwell .workspace-split.mod-right-split {
+.theme-dark.ctp-crownwell .workspace-split.mod-left-split,
+.theme-dark.ctp-crownwell .workspace-split.mod-right-split {
     background: #F5F0E8 !important;
 }
 
 /* Tab header inner icon - GOLD */
-.theme-light.ctp-crownwell .workspace-tab-header-inner-icon {
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-icon {
     color: #C9A227 !important;
 }
 
 /* Breadcrumbs path - GOLD */
-.theme-light.ctp-crownwell .view-header-breadcrumb {
+.theme-dark.ctp-crownwell .view-header-breadcrumb {
     color: #C9A227 !important;
 }
 
-.theme-light.ctp-crownwell .view-header-breadcrumb:hover {
+.theme-dark.ctp-crownwell .view-header-breadcrumb:hover {
     color: #FFFFFF !important;
 }
 
 /* Navigation buttons in view header */
-.theme-light.ctp-crownwell .view-header-nav-buttons {
+.theme-dark.ctp-crownwell .view-header-nav-buttons {
     background: #000000 !important;
 }
 
-.theme-light.ctp-crownwell .view-header-nav-buttons .clickable-icon {
+.theme-dark.ctp-crownwell .view-header-nav-buttons .clickable-icon {
     color: #C9A227 !important;
 }
 
 /* Workspace leaf header */
-.theme-light.ctp-crownwell .workspace-leaf-header {
+.theme-dark.ctp-crownwell .workspace-leaf-header {
     background: #000000 !important;
 }
 
 /* Mod-root for workspace */
-.theme-light.ctp-crownwell .mod-root .workspace-tab-header-container {
+.theme-dark.ctp-crownwell .mod-root .workspace-tab-header-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
@@ -2229,7 +2254,7 @@ settings:
 /* ====== TOP TAB BAR - Additional selectors ====== */
 
 /* CSS Variable overrides for Crownwell */
-.theme-light.ctp-crownwell {
+.theme-dark.ctp-crownwell {
     --tab-container-background: #000000 !important;
     --titlebar-background: #000000 !important;
     --titlebar-background-focused: #000000 !important;
@@ -2240,12 +2265,12 @@ settings:
 }
 
 /* FORCE BLACK for all workspace-tabs areas in Crownwell */
-.theme-light.ctp-crownwell .workspace-tabs,
-.theme-light.ctp-crownwell .workspace-tabs *,
-.theme-light.ctp-crownwell .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-tab-header-container *,
-.theme-light.ctp-crownwell .mod-root .workspace-tabs,
-.theme-light.ctp-crownwell .mod-root .workspace-tabs * {
+.theme-dark.ctp-crownwell .workspace-tabs,
+.theme-dark.ctp-crownwell .workspace-tabs *,
+.theme-dark.ctp-crownwell .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-tab-header-container *,
+.theme-dark.ctp-crownwell .mod-root .workspace-tabs,
+.theme-dark.ctp-crownwell .mod-root .workspace-tabs * {
     --ctp-mantle: 0, 0, 0 !important;
     --ctp-crust: 0, 0, 0 !important;
     --ctp-base: 0, 0, 0 !important;
@@ -2254,66 +2279,66 @@ settings:
 }
 
 /* Override stacked tabs view-header for Crownwell */
-.theme-light.ctp-crownwell.stacked-tabs .workspace-leaf .view-header,
-.theme-light.ctp-crownwell .stacked-tabs .workspace-leaf .view-header {
+.theme-dark.ctp-crownwell.stacked-tabs .workspace-leaf .view-header,
+.theme-dark.ctp-crownwell .stacked-tabs .workspace-leaf .view-header {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Override any rgba(var(--ctp-mantle)) backgrounds in tab areas */
-.theme-light.ctp-crownwell .workspace-tabs,
-.theme-light.ctp-crownwell .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-tab-container,
-.theme-light.ctp-crownwell .workspace-leaf-header,
-.theme-light.ctp-crownwell .mod-root .workspace-tabs,
-.theme-light.ctp-crownwell .mod-root .workspace-tab-header-container {
+.theme-dark.ctp-crownwell .workspace-tabs,
+.theme-dark.ctp-crownwell .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-tab-container,
+.theme-dark.ctp-crownwell .workspace-leaf-header,
+.theme-dark.ctp-crownwell .mod-root .workspace-tabs,
+.theme-dark.ctp-crownwell .mod-root .workspace-tab-header-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Main workspace tabs container */
-.theme-light.ctp-crownwell .workspace-tabs,
-.theme-light.ctp-crownwell .mod-root .workspace-tabs {
+.theme-dark.ctp-crownwell .workspace-tabs,
+.theme-dark.ctp-crownwell .mod-root .workspace-tabs {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Tab container wrapper */
-.theme-light.ctp-crownwell .workspace-tab-container,
-.theme-light.ctp-crownwell .mod-root .workspace-tab-container {
+.theme-dark.ctp-crownwell .workspace-tab-container,
+.theme-dark.ctp-crownwell .mod-root .workspace-tab-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Stacked tabs mode */
-.theme-light.ctp-crownwell .workspace-tabs.mod-stacked,
-.theme-light.ctp-crownwell .workspace-tabs.mod-stacked .workspace-tab-container {
+.theme-dark.ctp-crownwell .workspace-tabs.mod-stacked,
+.theme-dark.ctp-crownwell .workspace-tabs.mod-stacked .workspace-tab-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Tab header area wrapper */
-.theme-light.ctp-crownwell .workspace-tab-header-tab-list {
+.theme-dark.ctp-crownwell .workspace-tab-header-tab-list {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Any remaining workspace backgrounds */
-.theme-light.ctp-crownwell .workspace > .workspace-tabs,
-.theme-light.ctp-crownwell .workspace-split > .workspace-tabs {
+.theme-dark.ctp-crownwell .workspace > .workspace-tabs,
+.theme-dark.ctp-crownwell .workspace-split > .workspace-tabs {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Horizontal tab layout */
-.theme-light.ctp-crownwell .workspace-tabs:not(.mod-stacked) .workspace-tab-header-container {
+.theme-dark.ctp-crownwell .workspace-tabs:not(.mod-stacked) .workspace-tab-header-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Ensure all tab-related wrappers are black */
-.theme-light.ctp-crownwell .workspace-tabs .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-tabs .workspace-tab-header-container-inner {
+.theme-dark.ctp-crownwell .workspace-tabs .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-tabs .workspace-tab-header-container-inner {
     background: #000000 !important;
     background-color: #000000 !important;
 }
@@ -2321,50 +2346,50 @@ settings:
 /* ====== AGGRESSIVE TOP BAR SELECTORS ====== */
 
 /* Target EVERY possible tab/header element */
-.theme-light.ctp-crownwell [class*="workspace-tab"],
-.theme-light.ctp-crownwell [class*="tab-header"],
-.theme-light.ctp-crownwell [class*="tab-container"] {
+.theme-dark.ctp-crownwell [class*="workspace-tab"],
+.theme-dark.ctp-crownwell [class*="tab-header"],
+.theme-dark.ctp-crownwell [class*="tab-container"] {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Workspace tab header with all variations */
-.theme-light.ctp-crownwell .workspace-tab-header,
-.theme-light.ctp-crownwell .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-tab-header-container-inner,
-.theme-light.ctp-crownwell .workspace-tab-header-spacer,
-.theme-light.ctp-crownwell .workspace-tab-header-tab-list {
+.theme-dark.ctp-crownwell .workspace-tab-header,
+.theme-dark.ctp-crownwell .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-tab-header-container-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header-spacer,
+.theme-dark.ctp-crownwell .workspace-tab-header-tab-list {
     background: #000000 !important;
     background-color: #000000 !important;
 }
 
 /* Tab text - GOLD */
-.theme-light.ctp-crownwell .workspace-tab-header-inner,
-.theme-light.ctp-crownwell .workspace-tab-header-inner-title,
-.theme-light.ctp-crownwell .workspace-tab-header-inner-icon,
-.theme-light.ctp-crownwell [class*="tab-header"] * {
+.theme-dark.ctp-crownwell .workspace-tab-header-inner,
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-title,
+.theme-dark.ctp-crownwell .workspace-tab-header-inner-icon,
+.theme-dark.ctp-crownwell [class*="tab-header"] * {
     color: #C9A227 !important;
 }
 
 /* Back/forward navigation in tab area */
-.theme-light.ctp-crownwell .workspace-tab-header-inner .clickable-icon,
-.theme-light.ctp-crownwell .workspace-tab-header .clickable-icon {
+.theme-dark.ctp-crownwell .workspace-tab-header-inner .clickable-icon,
+.theme-dark.ctp-crownwell .workspace-tab-header .clickable-icon {
     color: #C9A227 !important;
 }
 
 /* View header icon container (the bar with back arrow) */
-.theme-light.ctp-crownwell .view-header-icon,
-.theme-light.ctp-crownwell .view-header-title-container,
-.theme-light.ctp-crownwell .view-header-title-parent {
+.theme-dark.ctp-crownwell .view-header-icon,
+.theme-dark.ctp-crownwell .view-header-title-container,
+.theme-dark.ctp-crownwell .view-header-title-parent {
     background: #000000 !important;
     background-color: #000000 !important;
     color: #C9A227 !important;
 }
 
 /* Make sure the entire top area is covered */
-.theme-light.ctp-crownwell .mod-root > .workspace-tab-header-container,
-.theme-light.ctp-crownwell .workspace-split.mod-root > .workspace-tabs > .workspace-tab-header-container {
+.theme-dark.ctp-crownwell .mod-root > .workspace-tab-header-container,
+.theme-dark.ctp-crownwell .workspace-split.mod-root > .workspace-tabs > .workspace-tab-header-container {
     background: #000000 !important;
     background-color: #000000 !important;
 }
