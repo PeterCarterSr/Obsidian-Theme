@@ -1,53 +1,55 @@
 # Arcadia Theme for Obsidian
 
-A comprehensive, professional Obsidian theme with **34 color schemes** (16 dark + 18 light), OneNote-style features, and extensive customization through Style Settings.
+Arcadia turns Obsidian into a calm, book-like writing environment. It ships **34 color schemes** (16 dark, 18 light), OneNote-style paper and sticky notes, 50+ file type icons, 21 alternate checkboxes, and deep customization through the Style Settings plugin. It is free and always will be.
 
 ![Arcadia Theme Preview](screenshots/hero-dark.png)
 
 ---
 
-> **Enjoying Arcadia?** [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buy-me-a-coffee)](https://buymeacoffee.com/drcarterd)
-
----
-
 ## Table of Contents
 
+- [Features](#features)
 - [Getting Started](#getting-started)
 - [Installation](#installation)
 - [Color Schemes](#color-schemes)
 - [Style Settings Configuration](#style-settings-configuration)
 - [Feature Guide](#feature-guide)
-  - [File Icons](#file-icons)
-  - [Alternate Checkboxes](#alternate-checkboxes)
-  - [Custom Callouts](#custom-callouts)
-  - [Sticky Notes](#sticky-notes)
-  - [Paper Styles](#paper-styles)
-  - [Media Embedding](#media-embedding)
-  - [Code Blocks](#code-blocks)
-  - [Cards View](#cards-view)
-  - [Rainbow Folders](#rainbow-folders)
-  - [Tag Colors](#tag-colors)
-  - [Progress Bars](#progress-bars)
-  - [Image Controls](#image-controls)
 - [Accessibility](#accessibility)
 - [Plugin Compatibility](#plugin-compatibility)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
+- [More from Arcadia Studio](#more-from-arcadia-studio)
 - [Support This Theme](#support-this-theme)
-- [Credits](#credits)
+- [License](#license)
 - [Changelog](#changelog)
+
+---
+
+## Features
+
+- **34 color schemes**: 16 dark and 18 light, including newspaper, encyclopedia, publishing, and genealogy-inspired collections
+- **14 content fonts and 6 code fonts**, selectable in Style Settings
+- **50+ file type icons** with per-type colors in the file explorer
+- **21 alternate checkboxes** for task states (`- [!]`, `- [?]`, `- [*]`, and more)
+- **Paper styles**: lined, grid, dot, graph, legal pad, Cornell, music staff, plus page tints
+- **Sticky note callouts** in 8 colors with pushpin, folded corner, and flat variations
+- **Custom callouts**: timeline, profile, definition, pro/con, recipe, kanban, stats, and more
+- **Polished media embedding**: shadows, rounded corners, styled audio and video players
+- **Cards view** for Dataview tables, rainbow folders, tag color pills
+- **Code block enhancements**: language badges, optional line numbers, Dracula/Nord/GitHub syntax themes
+- **Accessibility**: OpenDyslexic mode, high contrast mode, reduced motion support
 
 ---
 
 ## Getting Started
 
 1. **Install the theme** (see [Installation](#installation) below)
-2. **Install the Style Settings plugin** (Settings > Community Plugins > Browse > "Style Settings")
-3. **Pick a color scheme**: Settings > Style Settings > Arcadia Theme > Dark/Light Theme Variant
-4. **Choose your fonts**: Settings > Style Settings > Arcadia Typography > Content Font
-5. **Explore features**: Try alternate checkboxes, paper styles, sticky notes, and callouts
+2. **Install the Style Settings plugin** (Settings > Community plugins > Browse > "Style Settings")
+3. **Pick a color scheme**: Settings > Style Settings > Arcadia Color Schemes
+4. **Choose your fonts**: Settings > Style Settings > Arcadia Typography
+5. **Explore features**: alternate checkboxes, paper styles, sticky notes, and custom callouts
 
-Without Style Settings, Arcadia uses sensible defaults. With it, you unlock 55+ customization options.
+Without Style Settings, Arcadia uses sensible defaults (Granite dark, Marble light). With it, you unlock 50+ customization options.
 
 ---
 
@@ -64,19 +66,14 @@ Without Style Settings, Arcadia uses sensible defaults. With it, you unlock 55+ 
 
 1. Download `theme.css` and `manifest.json` from this repository
 2. In your vault, navigate to `.obsidian/themes/`
-3. Create a new folder called `Arcadia`
+3. Create a folder called `Arcadia`
 4. Place both files inside the `Arcadia` folder
-5. In Obsidian: **Settings** > **Appearance** > **Themes** > Select **"Arcadia"**
+5. In Obsidian: **Settings** > **Appearance** > **Themes** > select **"Arcadia"**
 
----
+### Requirements
 
-## Requirements
-
-### Required
-- **Obsidian** version 0.16.0 or higher
-
-### Highly Recommended
-- **[Style Settings Plugin](https://github.com/mgmeyers/obsidian-style-settings)** for all customization options
+- **Obsidian** 0.16.0 or higher
+- **[Style Settings plugin](https://github.com/mgmeyers/obsidian-style-settings)** (optional, strongly recommended for customization)
 
 ---
 
@@ -129,53 +126,61 @@ Without Style Settings, Arcadia uses sensible defaults. With it, you unlock 55+ 
 ### How to Change Color Scheme
 
 1. Open **Settings** > **Style Settings**
-2. Expand **Arcadia Theme** > **Color Scheme**
-3. Choose **Dark Theme Variant** or **Light Theme Variant**
-4. Select your preferred scheme from the dropdown
+2. Expand **Arcadia Color Schemes**
+3. Choose **Dark Theme Flavor** or **Light Theme Flavor** from the dropdowns
 
 ---
 
 ## Style Settings Configuration
 
-After installing the Style Settings plugin, you'll find these option categories:
+After installing the Style Settings plugin, you will find these sections under Settings > Style Settings:
 
-### Arcadia Theme (Main)
-- **Dark Theme Variant**: Choose from 16 dark color schemes
-- **Light Theme Variant**: Choose from 18 light color schemes
+### Arcadia Color Schemes
+- **Dark Theme Flavor**: 16 dark schemes
+- **Light Theme Flavor**: 18 light schemes
+
+### Arcadia Theme Settings
+- **Accent color override**: Indigo, Emerald, Rose, or Teal (replaces the scheme's built-in accent)
 
 ### Arcadia Typography
+- **Font Size Scale**: Small, Normal, Large, Extra Large
+- **Line Height**: Compact, Normal, Relaxed, Loose
+- **Reading Width**: Narrow, Normal, Wide, Full
 - **Content Font**: Vollkorn, Georgia, Merriweather, Crimson Pro, Lora, Literata, EB Garamond, Libre Caslon Text, Cormorant Garamond, Source Serif 4, Inter, Roboto, Open Sans, System Sans-Serif
-- **Code Font**: JetBrains Mono, Fira Code, Source Code Pro, IBM Plex Mono
-- **Enable OpenDyslexic**: Toggle dyslexia-friendly font
+- **Code Font**: JetBrains Mono, Fira Code, Source Code Pro, Cascadia Code, IBM Plex Mono, Consolas/Courier
 
-### Arcadia Accent Colors
-Choose from 15 accent colors: Blue, Purple, Pink, Red, Orange, Yellow, Green, Teal, Cyan, Indigo, Violet, Rose, Amber, Emerald, Sky
-
-### Arcadia Code Blocks
-- **Syntax Theme**: Dracula, Nord, GitHub Dark, GitHub Light
-- **Show Line Numbers**: Toggle line numbers in code blocks
-- **Show Language Label**: Toggle language badge on code blocks
-
-### Arcadia File Icons
-- **Enable File Icons**: Toggle custom file type icons
-- **Icon Color Mode**: Colorful or Monochrome
-
-### Arcadia Checkboxes
-- **Enable Alternate Checkboxes**: Toggle custom checkbox styles
+Font choices apply when the font is installed on your system; otherwise a fallback stack (Georgia, system serif, system sans, or monospace) is used. The theme does not download fonts.
 
 ### Arcadia Editor
-- **Line Width**: Narrow, Medium, Wide, Full
-- **Line Height**: Compact, Normal, Relaxed, Spacious
+- **Active Line Highlighting**: Off, Subtle, Moderate, Strong
+- **Focus Mode**: dim inactive paragraphs
+- **Show Line Numbers**
 
-### Arcadia UI
-- **Tab Style**: Default, Rounded, Pill, Underline
-- **Enable Rainbow Folders**: Color-code top-level folders
-- **Enable Cards View**: Grid layout for file lists
+### Arcadia Links & Tags
+- **Link Style**: Underlined, No Underline, Underline on Hover, Dotted
+- **Tag Style**: Pill, Hashtag, Badge
+- **Highlight Color**: Yellow, Blue, Green, Pink, Orange
 
-### Arcadia Paper and Notes
-- **Paper Styles**: Lined, Grid, Dot, Legal, Cornell, Graph, Music
-- **Page Tint**: White, Cream, Blue, Green, Pink, Yellow, Lavender
-- **Sticky Note Style**: Default, Pushpin, Folded Corner, Flat
+### Arcadia Lists & Checkboxes
+- **Checkbox Style**: Square, Circle, Rounded Square
+- **List Bullet Style**: Default, Arrows, Diamonds, Stars
+- **Indentation Guides** toggle
+
+### Arcadia Tables
+- **Table Style**: Default, Striped Rows, Borderless, Compact
+- **Sticky Table Headers** toggle
+
+### Arcadia Workspace
+- **Tab Style**: Default, Rounded, Squared, Minimal
+
+### Arcadia Accessibility
+- **High Contrast Mode**, **Reduce Motion**, **Dyslexia-Friendly Mode**
+
+### Arcadia Advanced Features
+Rainbow folders, Cards view, image grid, code line numbers, syntax themes (Dracula, Nord, GitHub), animated graph connections, stacked tabs, bordered embeds, and media options (polished borders, large controls, waveform, no shadows, extra rounding).
+
+### Arcadia Paper & Notes
+Paper style toggles (lined, grid, dot, Cornell) and sticky note options (pushpin, folded corner, flat, handwriting font).
 
 ---
 
@@ -183,36 +188,26 @@ Choose from 15 accent colors: Blue, Purple, Pink, Red, Orange, Yellow, Green, Te
 
 ### File Icons
 
-Custom colored icons appear next to files in the file explorer, making it easy to identify file types at a glance.
-
-**Supported file types (50+):**
+Colored icons appear automatically next to files in the file explorer, covering 50+ extensions:
 
 | Category | Extensions |
 |----------|------------|
 | Documents | `.md`, `.txt`, `.rtf`, `.pdf` |
 | Microsoft Office | `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx` |
 | Images | `.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.webp`, `.svg` |
-| Audio | `.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a` |
-| Video | `.mp4`, `.webm`, `.mov`, `.avi`, `.mkv` |
+| Audio | `.mp3`, `.wav`, `.ogg` |
+| Video | `.mp4`, `.mkv`, `.avi` |
 | Code | `.js`, `.ts`, `.py`, `.java`, `.html`, `.css`, `.json`, `.xml`, `.yaml` |
 | Archives | `.zip`, `.rar`, `.7z`, `.tar`, `.gz` |
-| Ebooks | `.epub`, `.mobi` |
-| Fonts | `.ttf`, `.otf`, `.woff` |
-
-**To enable/disable:**
-**Settings** > **Style Settings** > **Arcadia File Icons** > **Enable File Icons**
-
----
+| Ebooks | `.epub`, `.mobi`, `.azw` |
+| Fonts | `.ttf`, `.otf`, `.woff`, `.woff2` |
 
 ### Alternate Checkboxes
 
-21 unique checkbox styles for task management and note-taking.
-
-**Usage:** Type a checkbox with a special character inside the brackets.
+Type a special character inside the brackets:
 
 | Syntax | Result | Use Case |
 |--------|--------|----------|
-| `- [ ]` | Empty checkbox | Incomplete task |
 | `- [x]` | Green checkmark | Completed task |
 | `- [-]` | Red strikethrough | Canceled task |
 | `- [>]` | Blue arrow right | Forwarded/Deferred |
@@ -235,16 +230,9 @@ Custom colored icons appear next to files in the file explorer, making it easy t
 | `- [f]` | Orange flame | Urgent/Hot |
 | `- [I]` | Yellow lightbulb | Idea |
 
-**To enable/disable:**
-**Settings** > **Style Settings** > **Arcadia Checkboxes** > **Enable Alternate Checkboxes**
-
----
-
 ### Custom Callouts
 
 Extended callout types beyond Obsidian's defaults: `timeline`, `profile`, `aside`, `definition`, `pro`, `con`, `goal`, `bookmark`, `question`, `answer`, `recipe`, `kanban`, `paraphrase`, `stats`.
-
-**Usage:** Create a blockquote with `[!callout-type]` on the first line.
 
 ```markdown
 > [!timeline] Project History
@@ -253,131 +241,71 @@ Extended callout types beyond Obsidian's defaults: `timeline`, `profile`, `aside
 
 > [!pro] Advantages
 > - Fast performance
-> - Easy to use
-
-> [!con] Disadvantages
-> - Learning curve
 ```
-
----
 
 ### Sticky Notes
 
 OneNote-style sticky note callouts in 8 colors: yellow, pink, blue, green, purple, orange, gray, teal.
 
-**Usage:**
 ```markdown
 > [!sticky-yellow] Remember
-> Don't forget the meeting at 3pm!
+> Meeting at 3pm.
 ```
 
-**Style variations** (enable in Style Settings): Pushpin, Folded Corner, Flat.
-
-Add `-sm` or `-small` suffix for compact stickies.
-
----
+Style variations (enable in Style Settings): Pushpin, Folded Corner, Flat, Handwriting font. Add `-sm` or `-small` for compact stickies, `-wide` for full width.
 
 ### Paper Styles
 
-Transform your editor into realistic paper backgrounds.
+Transform the editor into a notebook page. Enable via Style Settings toggles (lined, grid, dot, Cornell) or per-note with `cssclasses` in frontmatter:
 
-| Style | Description | Best For |
-|-------|-------------|----------|
-| **Lined** | College ruled horizontal lines | Note-taking |
-| **Grid** | Square graph paper | Diagrams, math |
-| **Dot** | Bullet journal dot grid | Flexible layouts |
-| **Graph** | Engineering graph paper | Technical drawing |
-| **Legal** | Yellow legal pad | Traditional notes |
-| **Cornell** | Cornell note-taking format | Study notes |
-| **Music** | Musical staff lines | Sheet music |
+| cssclass | Style |
+|----------|-------|
+| `paper-lined` | College ruled with red margin |
+| `paper-grid` | Square graph paper (`-sm`/`-lg` variants) |
+| `paper-dot` | Bullet journal dot grid |
+| `paper-graph` | Engineering graph paper |
+| `paper-legal` | Yellow legal pad |
+| `paper-cornell` | Cornell note-taking layout |
+| `paper-music` | Musical staff lines |
+| `paper-iso` | Isometric grid |
 
-**Page tint colors:** White, Cream, Blue, Green, Pink, Yellow, Lavender (in both light and dark modes).
-
-**To enable:** Settings > Style Settings > Arcadia Paper and Notes
-
----
+Page tints: `paper-cream`, `paper-blue`, `paper-green`, `paper-pink`, `paper-yellow`, `paper-lavender` (adjusted automatically in dark mode).
 
 ### Media Embedding
 
-OneNote-style polished media presentation with shadows, rounded corners, and hover effects.
+Polished images, video, and audio with shadows, rounded corners, and hover effects. Size and layout via per-note `cssclasses`:
 
-**Image size presets:**
 ```markdown
-![[image.png|small]]   // 200px
-![[image.png|medium]]  // 400px
-![[image.png|large]]   // 600px
-![[image.png|full]]    // 100% width
+img-small / img-medium / img-large / img-full   (max width presets)
+img-center, img-circle, img-rounded, img-border, img-shadow
+img-float-left, img-float-right, img-grid, img-banner
+img-invert   (invert diagrams in dark mode)
 ```
-
-**Float images:**
-```markdown
-![[image.png|left]]    // Float left
-![[image.png|right]]   // Float right
-```
-
----
 
 ### Code Blocks
 
-Enhanced code block styling with syntax themes: Dracula, Nord, GitHub Dark, GitHub Light.
-
-Features: language label badge, optional line numbers, copy button styling, smooth scrolling.
-
-**To configure:** Settings > Style Settings > Arcadia Code Blocks
-
----
+Language badges on fenced code blocks, optional line numbers, styled copy button, and three syntax themes (Dracula, Nord, GitHub) toggled in Style Settings > Arcadia Advanced Features.
 
 ### Cards View
 
-Display file lists as a grid of cards. Works with file explorer, search results, and Dataview TABLE queries.
-
-**To enable:** Settings > Style Settings > Arcadia UI > Enable Cards View
-
----
+Display Dataview TABLE results as a grid of cards. Enable in Style Settings > Arcadia Advanced Features, or per note with `cssclasses: cards`. Options: `cards-cover`, `cards-cols-1` through `cards-cols-6`, `cards-align-bottom`.
 
 ### Rainbow Folders
 
-Automatically color-code top-level folders in the file explorer using a 10-color cycle. Subfolders inherit a muted version of their parent's color.
-
-**To enable:** Settings > Style Settings > Arcadia UI > Enable Rainbow Folders
-
----
+Color-code folders in the file explorer with a 10-color cycle. Subfolders use muted variants. Enable in Style Settings > Arcadia Advanced Features.
 
 ### Tag Colors
 
-Tags are displayed as colored pills. Colors are automatically assigned based on tag text patterns.
-
----
-
-### Progress Bars
-
-Create visual progress indicators using HTML `<progress>` elements or Dataview queries.
-
-```html
-<progress value="75" max="100"></progress>
-```
-
----
-
-### Image Controls
-
-```markdown
-![[image.png|100]]       // 100px wide
-![[image.png|center]]    // Centered
-![[image.png|rounded]]   // Extra rounded corners
-![[image.png|no-shadow]] // Remove shadow
-![[image.png|border]]    // Add border
-![[image.png|300|center|rounded]]  // Combine multiple
-```
+Tags display as colored pills. Common tag names (`#todo`, `#done`, `#urgent`, `#project`, `#meeting`, and others) are automatically color-coded by pattern.
 
 ---
 
 ## Accessibility
 
-- **WCAG AA compliant** contrast ratios across all 34 color schemes
-- **OpenDyslexic font** option for dyslexia (Settings > Style Settings > Arcadia Typography)
-- **Reduced motion** support (respects system preference)
-- **High contrast mode** available
+- High contrast ratios across all 34 color schemes (documented per scheme in `theme.css`)
+- **OpenDyslexic font** option (Settings > Style Settings > Arcadia Accessibility); requires the [OpenDyslexic font](https://opendyslexic.org) installed on your system
+- **Reduced motion**: respects the system `prefers-reduced-motion` preference, plus a manual toggle
+- **High contrast mode** toggle
 
 ---
 
@@ -386,16 +314,16 @@ Create visual progress indicators using HTML `<progress>` elements or Dataview q
 | Plugin | Compatibility |
 |--------|---------------|
 | **Style Settings** | Full integration (required for customization) |
-| **Dataview** | Styled tables and lists |
+| **Dataview** | Styled tables, lists, and cards view |
 | **Tasks** | Checkbox styling |
 | **Kanban** | Board styling |
 | **Calendar** | Date styling |
 | **Excalidraw** | Canvas integration |
-| **Templater** | Compatible (no conflicts) |
-| **Periodic Notes** | Compatible (no conflicts) |
+| **Templater** | Compatible |
+| **Periodic Notes** | Compatible |
 | **Advanced Tables** | Table styling applies |
 | **Outliner** | List styling applies |
-| **Obsidian Git** | Compatible (no conflicts) |
+| **Obsidian Git** | Compatible |
 
 ---
 
@@ -404,61 +332,65 @@ Create visual progress indicators using HTML `<progress>` elements or Dataview q
 ### Theme not loading
 - Verify both `theme.css` and `manifest.json` are in `.obsidian/themes/Arcadia/`
 - Restart Obsidian after manual installation
-- Check that no other theme is overriding (Settings > Appearance > Themes)
+- Check that no other theme is selected (Settings > Appearance > Themes)
 
 ### Style Settings options not appearing
 - Install and enable the Style Settings plugin
-- After enabling, check Settings > Style Settings > Arcadia Theme
-- If options are missing, try switching themes and switching back
+- Check Settings > Style Settings for the Arcadia sections
+- If options are missing, switch themes and switch back
 
-### Fonts not loading
-- Fonts load from Google Fonts and require internet on first use
-- After first load, fonts are cached by the browser engine
-- If a font fails, the fallback stack (Georgia, system serif, or system sans) provides acceptable rendering
-
-### Checkboxes not rendering
-- Enable alternate checkboxes in Style Settings > Arcadia Checkboxes
-- Use the exact syntax: `- [x]`, `- [!]`, etc.
-- Only works in reading mode and live preview (not source mode)
+### Fonts not displaying as selected
+- Arcadia does not download fonts (Obsidian developer policies prohibit remote assets in themes); a font choice applies when that font is installed on your system
+- If a chosen font is not installed, the fallback stack (Georgia, system serif, or system sans) is used
+- Most content and code fonts are free downloads from [Google Fonts](https://fonts.google.com); OpenDyslexic is available at [opendyslexic.org](https://opendyslexic.org)
 
 ### Paper styles not showing
-- Paper styles require the `cssclasses` frontmatter property
-- Add `cssclasses: paper-lined` (or other style) to the note's YAML frontmatter
-- Paper tints are applied via Style Settings, not frontmatter
+- Enable a paper toggle in Style Settings > Arcadia Paper & Notes, or
+- Add `cssclasses: paper-lined` (or another style) to the note's frontmatter
 
-### Plugin conflicts
-- If another theme's CSS is cached, clear the Obsidian cache (Settings > About > Debug info > Clear cache)
-- Some CSS snippet plugins may conflict; disable them temporarily to test
+### Conflicts with snippets
+- CSS snippets load after the theme and can override it; disable snippets temporarily to test
 
 ---
 
 ## FAQ
 
-**Can I use this theme commercially?**
-Yes. Arcadia is released under the MIT license. You can use, modify, and distribute it freely.
+**Is Arcadia free?**
+Yes. Arcadia is free under the MIT license. You can use, modify, and redistribute it.
 
 **Does Arcadia work on mobile?**
-Arcadia is primarily designed for desktop Obsidian. Most features work on mobile, but paper styles and some visual effects may render differently on smaller screens.
+Yes. Most features work on mobile. Hover effects are disabled on touch screens, and some paper styles render best on larger screens.
 
 **Do I need Style Settings?**
-No, but it is highly recommended. Without it, you get the Granite (dark) and Marble (light) defaults. With it, you unlock all 34 color schemes and 55+ customization options.
+No, but it is strongly recommended. Without it you get the Granite (dark) and Marble (light) defaults; with it you unlock all 34 schemes and 50+ options.
 
 **Can I create my own color scheme?**
-Not through the UI. Custom schemes require editing `theme.css` directly. Each scheme needs ~20 CSS custom properties defined in an RGB triplet format.
+Yes, by editing `theme.css`. Each scheme defines about 20 CSS custom properties in RGB triplet format; copy an existing scheme block as a starting point.
 
-**How do I request a feature?**
-Open an issue on [GitHub](https://github.com/PeterCarterSr/Obsidian-Theme/issues) with the "Feature Request" template.
+**How do I report a bug or request a feature?**
+Open an issue on [GitHub](https://github.com/Arcadia-Studio/obsidian-arcadia-theme/issues) using the Bug Report or Feature Request template. Include your Obsidian version, OS, and steps to reproduce.
 
-**How do I report a bug?**
-Open an issue on [GitHub](https://github.com/PeterCarterSr/Obsidian-Theme/issues) with the "Bug Report" template. Include your Obsidian version, OS, and steps to reproduce.
+---
+
+## More from Arcadia Studio
+
+Arcadia is the free centerpiece of the Arcadia Studio suite for Obsidian. If you like the theme, these plugins pair well with it:
+
+- **[Arcadia Toolbar](https://github.com/Arcadia-Studio)**: word-processor-style ribbon toolbar with tabs for formatting, insertion, and navigation
+- **[Arcadia Projects](https://github.com/Arcadia-Studio)**: table and Kanban project views over your vault notes, with filtering and sorting
+- **[Arcadia Connect](https://github.com/Arcadia-Studio)**: personal CRM with @-mention contacts, interaction logs, and a deal pipeline
+- **[Arcadia Publisher](https://github.com/Arcadia-Studio)**: publish notes as HTML, PDF, and ePub with customizable themes and templates
+- **[Arcadia Hub](https://github.com/Arcadia-Studio)**: GitHub integration for browsing issues, pull requests, and repos from your notes
+
+Browse the full catalog at [arcadia-studio.lemonsqueezy.com](https://arcadia-studio.lemonsqueezy.com) or visit the [Arcadia Studio GitHub organization](https://github.com/Arcadia-Studio).
 
 ---
 
 ## Support This Theme
 
-If you find Arcadia useful for your work, consider supporting its development:
+If Arcadia is useful in your daily work, you can support development here:
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/drcarterd)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buy-me-a-coffee)](https://buymeacoffee.com/drcarterd)
 
 ---
 
@@ -467,37 +399,40 @@ If you find Arcadia useful for your work, consider supporting its development:
 **Author:** Peter J. Carter
 **Website:** [theologyinfocus.org](https://theologyinfocus.org)
 
----
-
 ## License
 
-**MIT License** - Free to use, modify, and distribute. See [LICENSE](LICENSE) for details.
+**MIT License**: free to use, modify, and distribute. See [LICENSE](LICENSE).
 
 ---
 
 ## Changelog
 
-### Version 2.1.0 (Current)
+### Version 2.1.1 (Current)
+- Removed remote font loading (the Google Fonts and jsDelivr `@import` lines) to comply with Obsidian developer policies; all font options now resolve from locally installed fonts with safe fallback stacks
+- Fixed a malformed CSS comment that closed early and caused the entire base variable block to be discarded by the CSS parser
+- Light mode completeness: palette, status, and surface colors are now defined for all light schemes (close buttons, quick switcher hotkeys, and error states were previously unreadable or unstyled in light mode)
+- Mapped the Arcadia palette onto official Obsidian CSS variables (`--background-primary`, `--text-normal`, `--text-accent`, `--interactive-accent`, `--text-selection`, scrollbar variables) so core UI and plugins follow the active scheme
+- Theme fonts now load through Obsidian's theme font variables, so fonts chosen in Settings > Appearance take precedence
+- Updated live preview selectors to current CodeMirror 6 classes (code blocks, blockquotes, tables); removed stale CM5 selectors that no longer matched
+- Removed vertical margins on editor lines that could misplace the cursor in live preview
+- Removed a layout rule that constrained the first editor pane to a fixed 280px width
+- Removed a folder collapse animation hack that clipped folders longer than 5000px
+- Fixed unreadable text while renaming files in dark mode, and top-level folder labels rendering at 8px
+- Performance: media transitions limited to transform and box-shadow; hover lift effects disabled on small screens
+- Bordered Embeds toggle in Style Settings now works; removed two settings that had no effect (font family override, border radius)
+- Accent hover color now follows the scheme accent instead of a fixed teal
+- Added Caveat to the sticky note handwriting font stack (used when the font is installed on your system)
+
+### Version 2.1.0
 - 34 color schemes (16 dark + 18 light)
 - 5 genealogy-inspired schemes (Parchment, Heritage, Sepia, Registry, Rootwood)
-- Font loading optimized: 32 HTTP requests reduced to 2
-- CSS architecture overhaul: nav colors consolidated to variables
-- 4 additional fonts added to Style Settings (EB Garamond, Libre Caslon Text, Cormorant Garamond, Source Serif 4)
-- 50+ file type icons with colors
-- 21 alternate checkbox types
-- OneNote-style media embedding
-- Paper styles (lined, grid, dot, legal, Cornell, graph, music)
-- Sticky notes callouts (8 colors with style variations)
+- Font loading consolidated to 2 HTTP requests
+- 4 additional fonts (EB Garamond, Libre Caslon Text, Cormorant Garamond, Source Serif 4)
+- 50+ file type icons, 21 alternate checkbox types
+- OneNote-style media embedding, paper styles, sticky notes
 - Code syntax themes (Dracula, Nord, GitHub)
-- Rainbow folders
-- Cards view for Dataview
-- Tag color pills
-- Progress bar styling
-- Custom callouts (timeline, profile, definition, pro/con, and more)
-- Full Style Settings integration (55+ options across 11 categories)
-- WCAG AA accessibility compliance
-- OpenDyslexic font support
-- Mobile responsive design
+- Rainbow folders, cards view, tag color pills
+- Full Style Settings integration
 
 ### Version 2.0.0
 - Initial community release with 23 color schemes
