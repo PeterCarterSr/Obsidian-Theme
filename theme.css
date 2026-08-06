@@ -2786,8 +2786,8 @@ h2,
     background: rgba(var(--ctp-mantle), 0.6);
     border-radius: 6px;
     margin: 1.25em 0;
-    border-color: rgb(var(--callout-color), 60%);
-    background-color: rgb(var(--callout-color), 10%);
+    border-color: color-mix(in srgb, var(--callout-color) 60%, transparent);
+    background-color: color-mix(in srgb, var(--callout-color) 10%, transparent);
 }
 
 .callout-title {
@@ -4962,9 +4962,9 @@ img[alt*="img-banner"] {
 
 /* ====== Timeline Callout ====== */
 .callout[data-callout="timeline"] {
-    --callout-color: 100, 150, 200;
+    --callout-color: rgb(100, 150, 200);
     --callout-icon: lucide-git-commit;
-    border-left: 3px solid rgb(var(--callout-color));
+    border-left: 3px solid var(--callout-color);
     position: relative;
     padding-left: 2rem;
 }
@@ -4976,7 +4976,7 @@ img[alt*="img-banner"] {
     top: 0;
     bottom: 0;
     width: 3px;
-    background: linear-gradient(180deg, rgb(var(--callout-color)), transparent);
+    background: linear-gradient(180deg, var(--callout-color), transparent);
 }
 
 .callout[data-callout="timeline"] .callout-title {
@@ -4987,7 +4987,7 @@ img[alt*="img-banner"] {
 /* ====== Profile/Person Callout ====== */
 .callout[data-callout="profile"],
 .callout[data-callout="person"] {
-    --callout-color: 150, 120, 180;
+    --callout-color: rgb(150, 120, 180);
     --callout-icon: lucide-user;
     display: flex;
     flex-direction: row;
@@ -5007,10 +5007,10 @@ img[alt*="img-banner"] {
 /* ====== Aside/Margin Note ====== */
 .callout[data-callout="aside"],
 .callout[data-callout="sidenote"] {
-    --callout-color: 140, 140, 140;
+    --callout-color: rgb(140, 140, 140);
     --callout-icon: lucide-message-square;
     font-size: 0.9em;
-    border-left: 2px solid rgba(var(--callout-color), 0.5);
+    border-left: 2px solid color-mix(in srgb, var(--callout-color) 50%, transparent);
     background: rgba(var(--ctp-mantle), 0.3);
     padding: 0.75rem 1rem;
 }
@@ -5025,9 +5025,9 @@ img[alt*="img-banner"] {
 /* ====== Definition Callout ====== */
 .callout[data-callout="definition"],
 .callout[data-callout="def"] {
-    --callout-color: 100, 180, 160;
+    --callout-color: rgb(100, 180, 160);
     --callout-icon: lucide-book-open;
-    border-left: 4px solid rgb(var(--callout-color));
+    border-left: 4px solid var(--callout-color);
 }
 
 .callout[data-callout="definition"] .callout-title,
@@ -5038,20 +5038,20 @@ img[alt*="img-banner"] {
 /* ====== Pro/Con Callouts ====== */
 .callout[data-callout="pro"],
 .callout[data-callout="pros"] {
-    --callout-color: 80, 160, 96;
+    --callout-color: rgb(80, 160, 96);
     --callout-icon: lucide-thumbs-up;
 }
 
 .callout[data-callout="con"],
 .callout[data-callout="cons"] {
-    --callout-color: 224, 80, 80;
+    --callout-color: rgb(224, 80, 80);
     --callout-icon: lucide-thumbs-down;
 }
 
 /* ====== Goal/Target Callout ====== */
 .callout[data-callout="goal"],
 .callout[data-callout="target"] {
-    --callout-color: 240, 180, 80;
+    --callout-color: rgb(240, 180, 80);
     --callout-icon: lucide-target;
 }
 
@@ -5059,28 +5059,28 @@ img[alt*="img-banner"] {
 .callout[data-callout="bookmark"],
 .callout[data-callout="reference"],
 .callout[data-callout="ref"] {
-    --callout-color: 200, 100, 150;
+    --callout-color: rgb(200, 100, 150);
     --callout-icon: lucide-bookmark;
 }
 
 /* ====== Question/FAQ Callout ====== */
 .callout[data-callout="faq"],
 .callout[data-callout="question"] {
-    --callout-color: 100, 150, 220;
+    --callout-color: rgb(100, 150, 220);
     --callout-icon: lucide-help-circle;
 }
 
 /* ====== Answer Callout ====== */
 .callout[data-callout="answer"],
 .callout[data-callout="solution"] {
-    --callout-color: 100, 180, 100;
+    --callout-color: rgb(100, 180, 100);
     --callout-icon: lucide-check-circle;
 }
 
 /* ====== Recipe/Steps Callout ====== */
 .callout[data-callout="recipe"],
 .callout[data-callout="steps"] {
-    --callout-color: 220, 140, 100;
+    --callout-color: rgb(220, 140, 100);
     --callout-icon: lucide-chef-hat;
 }
 
@@ -5118,7 +5118,7 @@ img[alt*="img-banner"] {
 /* ====== Kanban-style Callout ====== */
 .callout[data-callout="kanban"],
 .callout[data-callout="board"] {
-    --callout-color: 100, 140, 200;
+    --callout-color: rgb(100, 140, 200);
     --callout-icon: lucide-columns;
 }
 
@@ -5144,16 +5144,16 @@ img[alt*="img-banner"] {
 /* ====== Paraphrase/Citation Callout ====== */
 .callout[data-callout="paraphrase"],
 .callout[data-callout="cite"] {
-    --callout-color: 150, 150, 180;
+    --callout-color: rgb(150, 150, 180);
     --callout-icon: lucide-quote;
     font-style: italic;
-    border-left: 3px solid rgb(var(--callout-color));
+    border-left: 3px solid var(--callout-color);
 }
 
 /* ====== Stats/Metrics Callout ====== */
 .callout[data-callout="stats"],
 .callout[data-callout="metrics"] {
-    --callout-color: 80, 180, 180;
+    --callout-color: rgb(80, 180, 180);
     --callout-icon: lucide-bar-chart-2;
 }
 
@@ -5782,7 +5782,7 @@ span.progress-bar {
 
 /* Callout-based progress */
 .callout[data-callout="progress"] {
-    --callout-color: 80, 160, 120;
+    --callout-color: rgb(80, 160, 120);
     --callout-icon: lucide-bar-chart;
 }
 
